@@ -11,22 +11,57 @@
   --bg-color: #0A192F;
   --terminal-bg: #1E2D3D;
   --terminal-text: #64FFDA;
+  --code-keyword: #FF79C6;
+  --code-variable: #BD93F9;
+  --code-string: #F1FA8C;
+  --code-property: #8BE9FD;
+  --code-punctuation: #F8F8F2;
+  --code-operator: #FF79C6;
 }
 
-html {
+html, body {
   height: 100%;
   scroll-behavior: smooth;
+  scroll-snap-type: y proximity; /* Changed from 'mandatory' to 'proximity' for better scroll behavior */
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary-color) var(--primary-color);
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  overflow-x: hidden;
-  height: 100%;
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: visible !important;
+  touch-action: auto !important;
+  min-height: 100vh;
+}
+
+#root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--secondary-color);
+  border-radius: 10px;
+  border: 2px solid var(--primary-color);
 }
 
 .terminal {
@@ -40,7 +75,8 @@ canvas {
   top: 0;
   left: 0;
   z-index: -1;
-  touch-action: none;
+  touch-action: auto !important; /* Critical for touch/scroll to work */
+  pointer-events: auto !important; /* Ensure pointer events are not blocked */
 }
 
 .overlay {
@@ -56,13 +92,14 @@ canvas {
 
 .container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
+  padding: 80px 0;
 }
 
 .terminal-container {
@@ -127,30 +164,41 @@ section {
   position: relative;
   z-index: 1;
   scroll-snap-align: start;
+  padding: 2rem;
+  overflow: visible;
+  touch-action: auto !important;
 }
 
 .app {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: auto; /* Changed from 100% to auto */
+  min-height: 100vh;
+  overflow: visible;
+  /* Important for scrolling to work */
+  z-index: 0;
 }
 
 .content-container {
   width: 80%;
   max-width: 1200px;
   padding: 50px;
-  background: rgba(30, 45, 61, 0.5);
+  background: rgba(30, 45, 61, 0.7); /* Increased opacity for better visibility */
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
   position: relative;
   z-index: 2;
+  margin: 40px 0;
+  border: 1px solid rgba(100, 255, 218, 0.1);
 }
 
 .title {
   color: var(--secondary-color);
   margin-bottom: 30px;
   font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .hidden {
@@ -164,4 +212,243 @@ section {
   opacity: 1;
   filter: blur(0);
   transform: translateY(0);
+}
+
+/* Scroll down indicator */
+.scroll-indicator {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--secondary-color);
+  font-size: 14px;
+  padding: 8px 15px;
+  border-radius: 20px;
+  background-color: rgba(10, 25, 47, 0.8);
+  border: 1px solid var(--secondary-color);
+  z-index: 100;
+  animation: bounce 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+/* Computer Screen Styling */
+.computer-screen-content {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'JetBrains Mono', monospace;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen-toolbar {
+  height: 32px;
+  background-color: var(--terminal-bg);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.toolbar-button.red {
+  background-color: #FF5F56;
+}
+
+.toolbar-button.yellow {
+  background-color: #FFBD2E;
+}
+
+.toolbar-button.green {
+  background-color: #27C93F;
+}
+
+.toolbar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.toolbar-spacer {
+  width: 60px;
+}
+
+.screen-content {
+  flex: 1;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: auto;
+}
+
+.code-line {
+  margin-bottom: 6px;
+  white-space: pre-wrap;
+}
+
+.indented {
+  padding-left: 20px;
+}
+
+.double-indented {
+  padding-left: 40px;
+}
+
+.code-keyword {
+  color: var(--code-keyword);
+}
+
+.code-variable {
+  color: var(--code-variable);
+}
+
+.code-string {
+  color: var(--code-string);
+}
+
+.code-property {
+  color: var(--code-property);
+}
+
+.code-punctuation {
+  color: var(--code-punctuation);
+}
+
+.code-operator {
+  color: var(--code-operator);
+}
+
+/* Computer Screen Content for when not in 3D mode */
+.screen-portal-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-color);
+  overflow: auto;
+}
+
+.screen-portal {
+  width: 90%;
+  max-width: 1000px;
+  height: 85vh;
+  background-color: var(--terminal-bg);
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(100, 255, 218, 0.2);
+  overflow: hidden;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+/* Make sections responsive */
+@media (max-width: 768px) {
+  .content-container {
+    width: 90%;
+    padding: 30px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  section {
+    padding: 1rem;
+  }
+}
+
+/* Back button styling */
+.back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background-color: var(--terminal-bg);
+  color: var(--secondary-color);
+  border: 1px solid var(--secondary-color);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+}
+
+/* Screen content wrapper */
+.screen-content-wrapper {
+  padding: 20px;
+  max-height: calc(100vh - 32px); /* Subtract toolbar height */
+  overflow-y: auto;
+}
+
+/* Adjust sections when in screen view */
+.screen-portal .screen-content section {
+  min-height: 80vh;
+  height: auto;
+  padding: 20px 0;
+  margin: 10px 0;
+  scroll-snap-align: start;
+}
+
+/* Make sure content is visible in screen portal */
+.screen-portal .content-container {
+  background: rgba(30, 45, 61, 0.5);
+  margin: 20px 0;
+}
+
+/* Fade animation for screen portal */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.screen-portal {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Adjust responsiveness */
+@media (max-width: 768px) {
+  .screen-portal {
+    width: 95%;
+    height: 90vh;
+  }
+  
+  .computer-screen-content {
+    font-size: 12px;
+  }
+  
+  .code-line {
+    margin-bottom: 4px;
+  }
+  
+  .back-button {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
 } 

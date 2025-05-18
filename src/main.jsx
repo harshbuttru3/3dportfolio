@@ -3,16 +3,17 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 
-// Create the root only once
+// Prevent issues with strict mode creating duplicate roots
 const rootElement = document.getElementById('root');
 
-// Check if the root element already has a React root attached
-// This helps prevent the "already been passed to createRoot()" error
-if (!rootElement._reactRootContainer) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-} 
+// Clear any existing content to prevent React warnings
+if (rootElement._reactRootContainer) {
+  console.log('Removing existing React root');
+  rootElement.innerHTML = '';
+}
+
+// Create the React root directly
+const root = ReactDOM.createRoot(rootElement);
+
+// Render without strict mode to prevent duplicate rendering
+root.render(<App />); 
