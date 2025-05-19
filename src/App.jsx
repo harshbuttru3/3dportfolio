@@ -13,6 +13,7 @@ import SkillsSection from './components/SkillsSection';
 import ContactSection from './components/ContactSection';
 import Terminal from './components/Terminal';
 import ScreenPortal from './components/ScreenPortal';
+import Desktop from './components/Desktop/Desktop';
 
 // Register the ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -21,6 +22,8 @@ const App = () => {
   const [showTerminal, setShowTerminal] = useState(false);
   const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const [inScreenView, setInScreenView] = useState(false);
+  const [inDesktopView, setInDesktopView] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const appRef = useRef(null);
   const canvasRef = useRef(null);
   const htmlRef = useRef(null);
@@ -35,25 +38,26 @@ const App = () => {
     }
   }, [isScrollEnabled]);
 
-  // Monitor scroll position to determine when to transition to screen view
+  // Monitor scroll position to update the scrollProgress state
   useEffect(() => {
+    console.log("Setting up scroll monitor effect");
+    
     const handleScroll = () => {
       // Calculate normalized scroll position (0 to 1)
-      const scrollPos = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+      const totalHeight = document.body.scrollHeight - window.innerHeight;
+      if (totalHeight <= 0) return; // Prevent division by zero
       
-      // When scroll is at 40% or more, transition to screen view
-      if (scrollPos > 0.4 && !inScreenView) {
-        setInScreenView(true);
-      } 
-      // When scrolling back up to less than 30%, exit screen view
-      else if (scrollPos < 0.3 && inScreenView) {
-        setInScreenView(false);
-      }
+      const scrollPos = window.scrollY / totalHeight;
+      setScrollProgress(scrollPos);
     };
     
     window.addEventListener('scroll', handleScroll);
+    
+    // Trigger initial check
+    setTimeout(handleScroll, 500);
+    
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [inScreenView]);
+  }, []);
 
   useEffect(() => {
     console.log("App mounted");
@@ -133,17 +137,38 @@ const App = () => {
     setShowTerminal(!showTerminal);
   };
 
+  // Function to enter desktop view
+  const enterDesktopView = () => {
+    console.log("Entering desktop view");
+    setInDesktopView(true);
+    setInScreenView(false);
+  };
+
+  // Function to exit desktop view
+  const exitDesktopView = () => {
+    console.log("Exiting desktop view");
+    setInDesktopView(false);
+    setInScreenView(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Function to communicate screen view state to Scene
   const toggleScreenView = (state) => {
     setInScreenView(state);
   };
 
+  console.log("App render - State:", { 
+    inScreenView, 
+    inDesktopView,
+    scrollProgress: scrollProgress.toFixed(2)
+  });
+
   return (
     <div ref={appRef} className="app">
       <div className="overlay"></div>
       
-      {/* 3D Canvas - Hidden when in screen view mode */}
-      {!inScreenView && (
+      {/* 3D Canvas - Hidden when in screen or desktop view mode */}
+      {!inScreenView && !inDesktopView && (
         <Canvas
           ref={canvasRef}
           camera={{ position: [0, 0, 5], fov: 75 }}
@@ -191,6 +216,16 @@ const App = () => {
         </Canvas>
       )}
       
+      {/* Desktop View Button - Show when not in desktop view */}
+      {!inDesktopView && !inScreenView && (
+        <button 
+          className="enter-desktop-button"
+          onClick={enterDesktopView}
+        >
+          Enter Desktop
+        </button>
+      )}
+      
       {/* Screen Portal View - Only shown when in screen view mode */}
       {inScreenView && (
         <ScreenPortal>
@@ -203,24 +238,30 @@ const App = () => {
           </div>
         </ScreenPortal>
       )}
+      
+      {/* Desktop View - Only shown when in desktop view mode */}
+      {inDesktopView && (
+        <div className="desktop-wrapper" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1000 }}>
+          <Desktop scrollProgress={1} />
+        </div>
+      )}
 
       {showTerminal && <Terminal onClose={() => setShowTerminal(false)} />}
       
       {/* Improved scroll indicator with css animation - only shown in 3D view */}
-      {isScrollEnabled && !inScreenView && (
+      {isScrollEnabled && !inScreenView && !inDesktopView && (
         <div className="scroll-indicator">
-          Scroll down to explore
+          Scroll down to explore, <br/>
+          click "C" to interact.
         </div>
+      
       )}
       
-      {/* Back button when in screen view */}
-      {inScreenView && (
+      {/* Back button when in desktop or screen view */}
+      {(inScreenView || inDesktopView) && (
         <button 
           className="back-button"
-          onClick={() => {
-            setInScreenView(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onClick={exitDesktopView}
         >
           Back to 3D View
         </button>

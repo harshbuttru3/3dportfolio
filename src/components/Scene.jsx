@@ -4,24 +4,29 @@ import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls
 import * as THREE from 'three';
 import gsap from 'gsap';
 
-// Import our new ComputerScreen component
+// Import components
 import ComputerScreen from './ComputerScreen';
 
 // Custom 3D chair model - you can replace this with your own model
-const Chair = ({ position = [0, 0, 0], scale = 1, modelPath }) => {
+const Chair = ({ position = [0, 0, 0], scale = 1, modelPath, scrollProgress = 0 }) => {
   const chairRef = useRef();
   const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
   
   useFrame(() => {
     if (chairRef.current) {
-      // Fixed scale for chair
-      chairRef.current.position.y = -0.8;
-      chairRef.current.position.x = 0.3;
-      chairRef.current.position.z = -0.1;
-      chairRef.current.scale.x = 1.7;
-      chairRef.current.scale.y = 1.7;
-      chairRef.current.scale.z = 1.7;
-      chairRef.current.rotation.y = -1.9;
+      if (scrollProgress > 0.3) {
+        // Move chair out of scene when scrolled
+        chairRef.current.position.x = THREE.MathUtils.lerp(chairRef.current.position.x, 20, 0.1); // Move far to the right
+      } else {
+        // Fixed scale for chair
+        chairRef.current.position.y = -0.8;
+        chairRef.current.position.x = 0.3;
+        chairRef.current.position.z = -0.1;
+        chairRef.current.scale.x = 1.7;
+        chairRef.current.scale.y = 1.7;
+        chairRef.current.scale.z = 1.7;
+        chairRef.current.rotation.y = -1.9;
+      }
     }
   });
   
@@ -49,16 +54,22 @@ const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 
       // Smoothly interpolate position and rotation based on scroll
       if (scrollProgress > 0.3) {
         // When scrolled down, position desk to center the monitor in view
-        deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, 0.7, 0.9);
-        deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.4, 0.09);
-        deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.05);
-        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.05); // Rotate to face camera directly
+        deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, 1.23, 0.1);
+        deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.09, 0.01);
+        deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.01);
+        deskRef.current.scale.x = THREE.MathUtils.lerp(deskRef.current.scale.x, 0.29, 0.01);
+        deskRef.current.scale.y = THREE.MathUtils.lerp(deskRef.current.scale.y, 0.4, 0.01);
+        deskRef.current.scale.z = THREE.MathUtils.lerp(deskRef.current.scale.z, 0.4, 0.01);
+        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.01); // Rotate to face camera directly
       } else {
         // Default position
         deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, -0.9, 0.05);
         deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0, 0.05);
         deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -1.5, 0.05);
         deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -0.4, 0.05);
+        deskRef.current.scale.x = THREE.MathUtils.lerp(deskRef.current.scale.x, 0.2, 0.05);
+        deskRef.current.scale.y = THREE.MathUtils.lerp(deskRef.current.scale.y, 0.2, 0.05);
+        deskRef.current.scale.z = THREE.MathUtils.lerp(deskRef.current.scale.z, 0.2, 0.05);
       }
     }
   });
@@ -79,7 +90,7 @@ const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 
 };
 
 // Custom 3D human model
-const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath }) => {
+const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scrollProgress = 0 }) => {
   const humanRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [turned, setTurned] = useState(false);
@@ -105,27 +116,21 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath }) =
 
   useFrame((state) => {
     if (humanRef.current) {
-     // Fixed position for human
+      // Default scale
       humanRef.current.scale.x = 1.5;
       humanRef.current.scale.y = 1.5;
       humanRef.current.scale.z = 1.5;
-      humanRef.current.position.x = 0.1;
-      humanRef.current.position.y = -0.8;
-      humanRef.current.position.z = -0.2;
-      humanRef.current.rotation.y = -2.3;
-      // if (scrollProgress > 0.3) {
-      //   // When scrolled down, position desk to center the monitor in view
-      //   humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, 0.7, 0.9);
-      //   deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.4, 0.09);
-      //   deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.05);
-      //   deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.05); // Rotate to face camera directly
-      // } else {
-      //   // Default position
-      //   deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, -0.9, 0.05);
-      //   deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0, 0.05);
-      //   deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -1.5, 0.05);
-      //   deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -0.4, 0.05);
-      // }
+      
+      if (scrollProgress > 0.3) {
+        // Move human out of scene when scrolled
+        humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, -20, 0.1); // Move far to the left
+      } else {
+        // Fixed position for human
+        humanRef.current.position.x = 0.1;
+        humanRef.current.position.y = -0.8;
+        humanRef.current.position.z = -0.2;
+        humanRef.current.rotation.y = -2.3;
+      }
       
       if (turned) {
         // Gradually rotate to face camera
@@ -203,7 +208,6 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
   // Force enableControls to be the opposite of isScrollEnabled
   useEffect(() => {
     setEnableControls(!isScrollEnabled);
-    console.log("Scene: Control state updated based on scroll state:", !isScrollEnabled);
   }, [isScrollEnabled]);
   
   // Define model paths - removed invalid references
@@ -295,7 +299,6 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
       cameraRef.current.position.set(0, 2, 5);
       cameraRef.current.lookAt(0, 1, 0);
       setInScreenView(false);
-      setShowComputerScreen(false);
     }
     
     // If controls are enabled, don't move the camera with scroll
@@ -377,11 +380,13 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
         <Chair 
           position={[0, 0, 0.5]} 
           modelPath={modelPaths.chair}
+          scrollProgress={scroll.offset}
         />
         <Human 
           position={[0, 0, 0]} 
           toggleTerminal={toggleTerminal} 
           modelPath={modelPaths.human}
+          scrollProgress={scroll.offset}
         />
       </group>
       

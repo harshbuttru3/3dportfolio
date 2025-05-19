@@ -175,7 +175,8 @@ section {
   height: auto; /* Changed from 100% to auto */
   min-height: 100vh;
   overflow: visible;
-  /* Important for scrolling to work */
+  /* Ensure there's enough content for scrolling */
+  padding-bottom: 500vh; /* Add extra space at the bottom for scrolling */
   z-index: 0;
 }
 
@@ -451,4 +452,35 @@ section {
     font-size: 12px;
     padding: 6px 12px;
   }
+}
+
+/* Add styles for the Enter Desktop button */
+.enter-desktop-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  background-color: #3a1055;
+  color: #64FFDA;
+  border: 2px solid #64FFDA;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.enter-desktop-button:hover {
+  background-color: rgba(100, 255, 218, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(100, 255, 218, 0.5);
+}
+
+.enter-desktop-button:active {
+  transform: translateY(1px);
 } 
