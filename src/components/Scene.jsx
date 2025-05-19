@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls } from '@react-three/drei';
+import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -18,10 +18,10 @@ const Chair = ({ position = [0, 0, 0], scale = 1, modelPath }) => {
       chairRef.current.position.y = -0.8;
       chairRef.current.position.x = 0.3;
       chairRef.current.position.z = -0.1;
-      chairRef.current.scale.x = 1.5;
-      chairRef.current.scale.y = 1.5;
-      chairRef.current.scale.z = 1.5;
-      chairRef.current.rotation.y = -1.2;
+      chairRef.current.scale.x = 1.7;
+      chairRef.current.scale.y = 1.7;
+      chairRef.current.scale.z = 1.7;
+      chairRef.current.rotation.y = -1.9;
     }
   });
   
@@ -34,64 +34,44 @@ const Chair = ({ position = [0, 0, 0], scale = 1, modelPath }) => {
     );
   }
   
-  // Fallback to simple chair
-  return (
-    <group ref={chairRef} position={position} scale={scale}>
-      {/* Chair base */}
-      <mesh position={[0, 0.5, 0]}>
-        <boxGeometry args={[1.2, 0.1, 1.2]} />
-        <meshStandardMaterial color="#444" />
-      </mesh>
-      
-      {/* Chair back */}
-      <mesh position={[0, 1.25, -0.5]}>
-        <boxGeometry args={[1, 1.5, 0.1]} />
-        <meshStandardMaterial color="#444" />
-      </mesh>
-      
-      {/* Chair legs */}
-      {[
-        [-0.5, 0, 0.5],
-        [0.5, 0, 0.5],
-        [-0.5, 0, -0.5],
-        [0.5, 0, -0.5]
-      ].map((pos, i) => (
-        <mesh key={i} position={pos}>
-          <cylinderGeometry args={[0.05, 0.05, 1, 8]} />
-          <meshStandardMaterial color="#222" />
-        </mesh>
-      ))}
-    </group>
-  );
+
+ 
 };
 
 // Custom 3D desk with PC model
-const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath }) => {
+const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 0 }) => {
   const deskRef = useRef();
   const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
   
   // Add rotation and transformation controls
   useFrame((state, delta) => {
     if (deskRef.current) {
-      // Fixed position for desk
-      deskRef.current.position.x = -0.9;
-      deskRef.current.position.y = 0;
-      deskRef.current.position.z = -1.5;
-      deskRef.current.rotation.y = -0.4;
+      // Smoothly interpolate position and rotation based on scroll
+      if (scrollProgress > 0.3) {
+        // When scrolled down, position desk to center the monitor in view
+        deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, 0.7, 0.9);
+        deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.4, 0.09);
+        deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.05);
+        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.05); // Rotate to face camera directly
+      } else {
+        // Default position
+        deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, -0.9, 0.05);
+        deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0, 0.05);
+        deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -1.5, 0.05);
+        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -0.4, 0.05);
+      }
     }
   });
   
   if (!scene) {
-    return null; // Return nothing if model isn't loaded
+    return null;
   }
   
-  // Render custom model
   return (
     <group 
       ref={deskRef} 
       position={position} 
       scale={scale}
-      rotation={[0, 0, 0]} // Reset rotation to face front
     >
       <primitive object={scene} />
     </group>
@@ -103,18 +83,49 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath }) =
   const humanRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [turned, setTurned] = useState(false);
-  const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
+  const { scene, animations } = useGLTF(modelPath);
+  const { actions, names } = useAnimations(animations, humanRef);
+  const [isSitting, setIsSitting] = useState(true); // Default to sitting pose
 
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto';
   }, [hovered]);
 
+  useEffect(() => {
+    // Find the sitting animation
+    const sittingAction = actions['sit'] || actions['Sit'] || actions['sitting'] || actions['Sitting'];
+    if (sittingAction) {
+      if (isSitting) {
+        sittingAction.reset().play();
+      } else {
+        sittingAction.stop();
+      }
+    }
+  }, [isSitting, actions]);
+
   useFrame((state) => {
     if (humanRef.current) {
-      // Fixed position for human
-      humanRef.current.position.x = 0;
-      humanRef.current.position.y = 0;
-      humanRef.current.position.z = 0;
+     // Fixed position for human
+      humanRef.current.scale.x = 1.5;
+      humanRef.current.scale.y = 1.5;
+      humanRef.current.scale.z = 1.5;
+      humanRef.current.position.x = 0.1;
+      humanRef.current.position.y = -0.8;
+      humanRef.current.position.z = -0.2;
+      humanRef.current.rotation.y = -2.3;
+      // if (scrollProgress > 0.3) {
+      //   // When scrolled down, position desk to center the monitor in view
+      //   humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, 0.7, 0.9);
+      //   deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.4, 0.09);
+      //   deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.05);
+      //   deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.05); // Rotate to face camera directly
+      // } else {
+      //   // Default position
+      //   deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, -0.9, 0.05);
+      //   deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0, 0.05);
+      //   deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -1.5, 0.05);
+      //   deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -0.4, 0.05);
+      // }
       
       if (turned) {
         // Gradually rotate to face camera
@@ -139,7 +150,7 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath }) =
     if (!turned) {
       // Show greeting after turning
       setTimeout(() => {
-        toggleTerminal();
+        // toggleTerminal();
       }, 500);
     }
   };
@@ -175,64 +186,8 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath }) =
     );
   }
   
-  // Fallback to simple human model
-  return (
-    <group
-      ref={humanRef}
-      position={position}
-      scale={scale}
-      onClick={handleClick}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-    >
-      {/* Body */}
-      <mesh position={[0, 1.1, 0]}>
-        <capsuleGeometry args={[0.3, 0.8, 4, 8]} />
-        <meshStandardMaterial color={hovered ? "#64FFDA" : "#3a506b"} />
-      </mesh>
-      
-      {/* Head */}
-      <mesh position={[0, 1.8, 0]}>
-        <sphereGeometry args={[0.25, 16, 16]} />
-        <meshStandardMaterial color="#e0ac69" />
-      </mesh>
-      
-      {/* Arms */}
-      <mesh position={[-0.4, 1.1, 0.1]} rotation={[0, 0, -0.5]}>
-        <capsuleGeometry args={[0.08, 0.7, 4, 8]} />
-        <meshStandardMaterial color="#3a506b" />
-      </mesh>
-      <mesh position={[0.4, 1.1, 0.1]} rotation={[0, 0, 0.5]}>
-        <capsuleGeometry args={[0.08, 0.7, 4, 8]} />
-        <meshStandardMaterial color="#3a506b" />
-      </mesh>
-      
-      {/* Legs */}
-      <mesh position={[-0.2, 0.5, 0]} rotation={[0.3, 0, 0]}>
-        <capsuleGeometry args={[0.1, 0.7, 4, 8]} />
-        <meshStandardMaterial color="#1a2639" />
-      </mesh>
-      <mesh position={[0.2, 0.5, 0]} rotation={[0.3, 0, 0]}>
-        <capsuleGeometry args={[0.1, 0.7, 4, 8]} />
-        <meshStandardMaterial color="#1a2639" />
-      </mesh>
-      
-      {/* Speech bubble, only visible when turned */}
-      {turned && (
-        <group position={[0, 2.3, 0]}>
-          <Text
-            position={[0, 0, 0]}
-            fontSize={0.2}
-            color="#64FFDA"
-            anchorX="center"
-            anchorY="middle"
-          >
-            Hi, I'm Shivam!
-          </Text>
-        </group>
-      )}
-    </group>
-  );
+
+  
 };
 
 // Main 3D scene
@@ -254,7 +209,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
   // Define model paths - removed invalid references
   const modelPaths = {
     // Comment out any models that don't exist yet
-    // human: null,
+    human: "/models/cool_man.glb",
     chair: "/models/chair.glb",
     desk: "/models/your-desk-model.glb"  // Updated to point to the correct path in public folder
   };
@@ -357,37 +312,22 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
       cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 5, 0.05);
       cameraRef.current.lookAt(0, 1, 0);
       setInScreenView(false);
-      
-      // Gradually hide computer screen when returning to initial view
-      if (showComputerScreen) {
-        setTimeout(() => {
-          setShowComputerScreen(false);
-        }, 500);
-      }
     } 
     else if (scrollOffset < 0.3) {
-      // Zoom into the computer screen
+      // Transition to monitor view
       cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
-      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.35, 0.05);
-      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 0.5, 0.05);
-      cameraRef.current.lookAt(0, 1.35, -0.3);
-      
-      // Show computer screen component when zooming in
-      if (!showComputerScreen) {
-        setTimeout(() => {
-          setShowComputerScreen(true);
-        }, 300);
-      }
+      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.3, 0.05);
+      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 2, 0.05);
+      cameraRef.current.lookAt(0, 1.3, -0.5);
       setInScreenView(false);
     } 
     else {
-      // Inside the computer screen - transition to full screen view
+      // Final position - directly facing the monitor
       cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
-      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.35, 0.05);
-      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, -0.05, 0.05); // Much closer to screen
-      cameraRef.current.lookAt(0, 1.35, -1);
+      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.25, 0.05);
+      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 0.3, 0.05);
+      cameraRef.current.lookAt(0, 1.25, -0.5); // Look straight at monitor
       
-      // Set screen view mode for final transition
       if (!inScreenView && scrollOffset > 0.4) {
         setInScreenView(true);
       }
@@ -407,9 +347,6 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
         enabled={enableControls}
         makeDefault
         target={[0, 0, 0]}
-        onChange={() => console.log("Controls changed")}
-        onStart={() => console.log("Controls interaction started")}
-        onEnd={() => console.log("Controls interaction ended")}
       />
       
       {/* Helper text to show controls status */}
@@ -435,6 +372,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
         <Desk 
           position={[0, 0, -1.5]} 
           modelPath={modelPaths.desk}
+          scrollProgress={scroll.offset}
         />
         <Chair 
           position={[0, 0, 0.5]} 
@@ -445,18 +383,10 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
           toggleTerminal={toggleTerminal} 
           modelPath={modelPaths.human}
         />
-        
-        {/* Computer screen component - only visible when zoomed in */}
-        {showComputerScreen && (
-          <ComputerScreen 
-            isActive={showComputerScreen} 
-            scrollProgress={scroll.offset}
-          />
-        )}
       </group>
       
       {/* Technology floating elements (only visible until we zoom in) */}
-      {!showComputerScreen && [-3, -2, -1, 1, 2, 3].map((x, i) => (
+      {!inScreenView && [-3, -2, -1, 1, 2, 3].map((x, i) => (
         <mesh 
           key={i}
           position={[x * 2, Math.sin(x) + 3, -5 - Math.abs(x)]}
