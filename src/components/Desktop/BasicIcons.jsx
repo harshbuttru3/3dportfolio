@@ -4,9 +4,9 @@ import React from 'react';
 export const Icons = {
   terminal: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
-      <rect width="20" height="16" x="2" y="4" rx="2" fill="#333" />
-      <path d="M6 10l3 3-3 3" stroke="white" strokeWidth="1.5" fill="none" />
-      <path d="M11 16h7" stroke="white" strokeWidth="1.5" />
+      <rect width="20" height="16" x="2" y="4" rx="2" fill="#222" />
+      <path d="M4 7l4 4-4 4" stroke="#64FFDA" strokeWidth="1.5" fill="none" />
+      <path d="M10 15h8" stroke="#64FFDA" strokeWidth="1.5" />
     </svg>
   ),
   blender: (
@@ -25,12 +25,7 @@ export const Icons = {
       <circle cx="8.5" cy="5.5" r="0.5" fill="#34C759" />
     </svg>
   ),
-  finder: (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
-      <rect width="16" height="18" x="4" y="3" rx="2" fill="#5F9EEC" />
-      <path d="M6 9h12 M6 13h12 M6 17h8" stroke="white" strokeWidth="1" />
-    </svg>
-  ),
+  finder: imageIcon('/icons/finder.png'),
   discord: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
       <rect width="20" height="16" x="2" y="4" rx="2" fill="#5865F2" />
@@ -107,5 +102,14 @@ export const Icons = {
     </svg>
   )
 };
+
+// Helper function to create image-based icons
+function imageIcon(src) {
+  return (
+    <div className="image-icon" style={{ width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <img src={src} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    </div>
+  );
+}
 
 export default Icons; 

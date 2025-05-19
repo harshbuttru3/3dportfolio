@@ -15,28 +15,20 @@ const Dock = ({ applications, openApps, openApplication, activeApp }) => {
     'spotify'
   ];
 
-  // Map icon keys to the Icons component
+  // Get the icon for an app from the Icons object
   const getIcon = (appId) => {
-    switch(appId) {
-      case 'terminal':
-        return Icons.terminal;
-      case 'browser':
-        return Icons.browser;
-      case 'finder':
-        return Icons.finder;
-      case 'blender':
-        return Icons.blender;
-      case 'discord':
-        return Icons.discord;
-      case 'telegram':
-        return Icons.telegram;
-      case 'github':
-        return Icons.github;
-      case 'spotify':
-        return Icons.spotify;
-      default:
-        return Icons.browser; // Default fallback
+    // First check if we have a specific icon in the Icons object
+    if (Icons[appId]) {
+      return Icons[appId];
     }
+    
+    // If not, check if the app object has an icon
+    if (applications[appId] && applications[appId].icon) {
+      return applications[appId].icon;
+    }
+    
+    // Fallback to browser icon
+    return Icons.browser;
   };
 
   return (

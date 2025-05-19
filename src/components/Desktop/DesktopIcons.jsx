@@ -12,7 +12,7 @@ const DesktopIcons = ({ openApplication }) => {
     { id: 'linux', name: '100_Linux_Commands', iconType: 'document', type: 'document' },
     { id: 'akele', name: 'Akele raho by osho.mp3', iconType: 'music', type: 'audio' },
     { id: 'android', name: 'droidcam.txt', iconType: 'text', type: 'text' },
-    { id: 'chatgpt', name: 'ChatGPT', iconType: 'browser', type: 'app' },
+    { id: 'chatgpt', name: 'ChatGPT', iconType: 'chatgpt', type: 'app' },
     { id: 'amani', name: 'amani.pdf', iconType: 'pdf', type: 'pdf' },
     { id: 'blender', name: 'blender', iconType: 'folderBlue', type: 'folder' },
     { id: 'booking', name: 'Booking-App', iconType: 'folderBlue', type: 'folder' }
@@ -20,17 +20,27 @@ const DesktopIcons = ({ openApplication }) => {
 
   // Get appropriate icon for item
   const getIcon = (iconType) => {
+    // If the icon type exists directly in Icons object, use that
+    if (Icons[iconType]) {
+      return Icons[iconType];
+    }
+    
+    // Otherwise fallback to appropriate icon based on type
     switch(iconType) {
       case 'folder':
         return Icons.folder;
       case 'folderBlue':
         return Icons.folderBlue;
       case 'document':
+        return Icons.document;
       case 'pdf':
+        return Icons.pdf;
       case 'text':
+        return Icons.text;
       case 'image':
+        return Icons.image;
       case 'music':
-        return Icons.browser;
+        return Icons.music;
       default:
         return Icons.browser;
     }
