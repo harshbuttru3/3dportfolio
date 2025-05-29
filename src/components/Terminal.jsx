@@ -6,7 +6,7 @@ const Terminal = ({ onClose }) => {
   ]);
   const [currentCommand, setCurrentCommand] = useState('');
   const terminalContentRef = useRef(null);
-  
+
   // User data to be displayed with commands
   const userData = {
     name: 'Shivam',
@@ -49,12 +49,10 @@ const Terminal = ({ onClose }) => {
     }
   };
 
-  // Available commands
   const commands = {
-    help: () => {
-      return {
-        type: 'system',
-        content: `
+    help: () => ({
+      type: 'system',
+      content: `
 Available commands:
 - help: Show this help message
 - about: Display information about me
@@ -64,13 +62,11 @@ Available commands:
 - contact: Get my contact information
 - clear: Clear the terminal
 - exit: Close the terminal
-        `
-      };
-    },
-    about: () => {
-      return {
-        type: 'system',
-        content: `
+      `
+    }),
+    about: () => ({
+      type: 'system',
+      content: `
 Name: ${userData.name}
 Title: ${userData.title}
 Location: ${userData.location}
@@ -79,50 +75,41 @@ I'm a passionate Full Stack Developer and Cybersecurity Specialist with expertis
 secure, scalable, and performant web applications. With a strong foundation in both frontend and 
 backend technologies, I create seamless user experiences while ensuring robust security measures
 are in place. I love tackling complex problems and continuously learning new technologies.
-        `
-      };
-    },
-    skills: () => {
-      return {
-        type: 'system',
-        content: `
+      `
+    }),
+    skills: () => ({
+      type: 'system',
+      content: `
 My Technical Skills:
 ${userData.skills.map(skill => `• ${skill}`).join('\n')}
-        `
-      };
-    },
-    projects: () => {
-      return {
-        type: 'system',
-        content: `
+      `
+    }),
+    projects: () => ({
+      type: 'system',
+      content: `
 Recent Projects:
 ${userData.projects.map(project => 
 `• ${project.name}: ${project.description}
   Technologies: ${project.technologies}`
 ).join('\n\n')}
-        `
-      };
-    },
-    education: () => {
-      return {
-        type: 'system',
-        content: `
+      `
+    }),
+    education: () => ({
+      type: 'system',
+      content: `
 Education:
 ${userData.education.map(edu => `• ${edu}`).join('\n')}
-        `
-      };
-    },
-    contact: () => {
-      return {
-        type: 'system',
-        content: `
+      `
+    }),
+    contact: () => ({
+      type: 'system',
+      content: `
 Contact Information:
 • Email: ${userData.contact.email}
 • LinkedIn: ${userData.contact.linkedin}
 • GitHub: ${userData.contact.github}
-        `
-      };
-    },
+      `
+    }),
     clear: () => {
       setHistory([]);
       return null;
@@ -185,35 +172,66 @@ Contact Information:
   };
 
   return (
-    <div className="container">
-      <div className="terminal-container">
-        <div className="terminal-header">
-          <div className="terminal-circle red"></div>
-          <div className="terminal-circle yellow"></div>
-          <div className="terminal-circle green"></div>
-          <span style={{ marginLeft: '10px', color: '#CCD6F6' }}>Shivam's Terminal</span>
-        </div>
-        
-        <div ref={terminalContentRef} className="terminal-content">
-          {history.map((entry, index) => (
-            <div key={index} className="terminal">
-              {entry.type === 'user' ? (
-                <div>
-                  <span style={{ color: '#64FFDA' }}>➜</span> <span style={{ color: '#9D00FF' }}>~</span> $ {entry.content}
-                </div>
-              ) : (
-                <div style={{ whiteSpace: 'pre-line' }}>{entry.content}</div>
-              )}
-            </div>
-          ))}
-          <div className="terminal">
-            <span style={{ color: '#64FFDA' }}>➜</span> <span style={{ color: '#9D00FF' }}>~</span> $ {currentCommand}
-            <span className="typing"></span>
+    <div
+      className="terminal-real"
+      style={{
+        background: 'rgba(20, 20, 28, 0.98)',
+        color: '#CCD6F6',
+        fontFamily: 'JetBrains Mono, Fira Mono, monospace',
+        fontSize: '1rem',
+        padding: '1.5rem 1.5rem 1rem 1.5rem',
+        borderRadius: '10px',
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.25)'
+      }}
+    >
+      <div
+        ref={terminalContentRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          overflowY: 'auto',
+          paddingBottom: '0.5rem'
+        }}
+      >
+        {history.map((entry, index) => (
+          <div key={index} style={{ marginBottom: '0.2rem', whiteSpace: 'pre-line' }}>
+            {entry.type === 'user' ? (
+              <span>
+                <span style={{ color: '#64FFDA' }}>➜</span>{' '}
+                <span style={{ color: '#9D00FF' }}>~</span> $ {entry.content}
+              </span>
+            ) : (
+              <span>{entry.content}</span>
+            )}
           </div>
+        ))}
+        <div>
+          <span style={{ color: '#64FFDA' }}>➜</span>{' '}
+          <span style={{ color: '#9D00FF' }}>~</span> $ {currentCommand}
+          <span className="typing" style={{
+            display: 'inline-block',
+            width: '10px',
+            background: '#CCD6F6',
+            marginLeft: '2px',
+            animation: 'blink 1s steps(1) infinite'
+          }}></span>
         </div>
       </div>
+      {/* Optional: Add a close button if you want, but Desktop.jsx already handles window controls */}
+      <style>
+        {`
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
+        `}
+      </style>
     </div>
   );
 };
 
-export default Terminal; 
+export default Terminal;

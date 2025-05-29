@@ -1,68 +1,48 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
-import gsap from 'gsap';
 
-// Import components
-import ComputerScreen from './ComputerScreen';
-
-// Custom 3D chair model - you can replace this with your own model
+// Chair model
 const Chair = ({ position = [0, 0, 0], scale = 1, modelPath, scrollProgress = 0 }) => {
   const chairRef = useRef();
   const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
-  
   useFrame(() => {
     if (chairRef.current) {
       if (scrollProgress > 0.3) {
-        // Move chair out of scene when scrolled
-        chairRef.current.position.x = THREE.MathUtils.lerp(chairRef.current.position.x, 20, 0.1); // Move far to the right
+        chairRef.current.position.x = THREE.MathUtils.lerp(chairRef.current.position.x, 20, 0.1);
       } else {
-        // Fixed scale for chair
-        chairRef.current.position.y = -0.8;
         chairRef.current.position.x = 0.3;
+        chairRef.current.position.y = -0.8;
         chairRef.current.position.z = -0.1;
-        chairRef.current.scale.x = 1.7;
-        chairRef.current.scale.y = 1.7;
-        chairRef.current.scale.z = 1.7;
+        chairRef.current.scale.set(1.7, 1.7, 1.7);
         chairRef.current.rotation.y = -1.9;
       }
     }
   });
-  
-  if (scene) {
-    // Render custom model if available
-    return (
-      <group ref={chairRef} position={position} scale={scale}>
-        <primitive object={scene} />
-      </group>
-    );
-  }
-  
-
- 
+  if (!scene) return null;
+  return (
+    <group ref={chairRef} position={position} scale={scale}>
+      <primitive object={scene} />
+    </group>
+  );
 };
 
-// Custom 3D desk with PC model
+// Desk model
 const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 0 }) => {
   const deskRef = useRef();
   const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
-  
-  // Add rotation and transformation controls
-  useFrame((state, delta) => {
+  useFrame(() => {
     if (deskRef.current) {
-      // Smoothly interpolate position and rotation based on scroll
       if (scrollProgress > 0.3) {
-        // When scrolled down, position desk to center the monitor in view
         deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, 1.23, 0.1);
         deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0.09, 0.01);
         deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -0.7, 0.01);
         deskRef.current.scale.x = THREE.MathUtils.lerp(deskRef.current.scale.x, 0.29, 0.01);
         deskRef.current.scale.y = THREE.MathUtils.lerp(deskRef.current.scale.y, 0.4, 0.01);
         deskRef.current.scale.z = THREE.MathUtils.lerp(deskRef.current.scale.z, 0.4, 0.01);
-        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.01); // Rotate to face camera directly
+        deskRef.current.rotation.y = THREE.MathUtils.lerp(deskRef.current.rotation.y, -1.57, 0.01);
       } else {
-        // Default position
         deskRef.current.position.x = THREE.MathUtils.lerp(deskRef.current.position.x, -0.9, 0.05);
         deskRef.current.position.y = THREE.MathUtils.lerp(deskRef.current.position.y, 0, 0.05);
         deskRef.current.position.z = THREE.MathUtils.lerp(deskRef.current.position.z, -1.5, 0.05);
@@ -73,37 +53,28 @@ const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 
       }
     }
   });
-  
-  if (!scene) {
-    return null;
-  }
-  
+  if (!scene) return null;
   return (
-    <group 
-      ref={deskRef} 
-      position={position} 
-      scale={scale}
-    >
+    <group ref={deskRef} position={position} scale={scale}>
       <primitive object={scene} />
     </group>
   );
 };
 
-// Custom 3D human model
+// Human model
 const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scrollProgress = 0 }) => {
   const humanRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [turned, setTurned] = useState(false);
   const { scene, animations } = useGLTF(modelPath);
-  const { actions, names } = useAnimations(animations, humanRef);
-  const [isSitting, setIsSitting] = useState(true); // Default to sitting pose
+  const { actions } = useAnimations(animations, humanRef);
+  const [isSitting, setIsSitting] = useState(true);
 
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto';
   }, [hovered]);
 
   useEffect(() => {
-    // Find the sitting animation
     const sittingAction = actions['sit'] || actions['Sit'] || actions['sitting'] || actions['Sitting'];
     if (sittingAction) {
       if (isSitting) {
@@ -114,33 +85,24 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scr
     }
   }, [isSitting, actions]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (humanRef.current) {
-      // Default scale
-      humanRef.current.scale.x = 1.5;
-      humanRef.current.scale.y = 1.5;
-      humanRef.current.scale.z = 1.5;
-      
+      humanRef.current.scale.set(1.5, 1.5, 1.5);
       if (scrollProgress > 0.3) {
-        // Move human out of scene when scrolled
-        humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, -20, 0.1); // Move far to the left
+        humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, -20, 0.1);
       } else {
-        // Fixed position for human
         humanRef.current.position.x = 0.1;
         humanRef.current.position.y = -0.8;
         humanRef.current.position.z = -0.2;
         humanRef.current.rotation.y = -2.3;
       }
-      
       if (turned) {
-        // Gradually rotate to face camera
         humanRef.current.rotation.y = THREE.MathUtils.lerp(
           humanRef.current.rotation.y,
           Math.PI,
           0.05
         );
       } else {
-        // Gradually rotate to face desk
         humanRef.current.rotation.y = THREE.MathUtils.lerp(
           humanRef.current.rotation.y,
           0,
@@ -153,206 +115,146 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scr
   const handleClick = () => {
     setTurned(!turned);
     if (!turned) {
-      // Show greeting after turning
       setTimeout(() => {
         // toggleTerminal();
       }, 500);
     }
   };
 
-  if (scene) {
-    // Render custom model if available
-    return (
-      <group
-        ref={humanRef}
-        position={position}
-        scale={scale}
-        onClick={handleClick}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        <primitive object={scene} />
-        
-        {/* Speech bubble, only visible when turned */}
-        {turned && (
-          <group position={[0, 2.3, 0]}>
-            <Text
-              position={[0, 0, 0]}
-              fontSize={0.2}
-              color="#64FFDA"
-              anchorX="center"
-              anchorY="middle"
-            >
-              Hi, I'm Shivam!
-            </Text>
-          </group>
-        )}
-      </group>
-    );
-  }
-  
-
-  
+  if (!scene) return null;
+  return (
+    <group
+      ref={humanRef}
+      position={position}
+      scale={scale}
+      onClick={handleClick}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    >
+      <primitive object={scene} />
+      {turned && (
+        <group position={[0, 2.3, 0]}>
+          <Text
+            position={[0, 0, 0]}
+            fontSize={0.2}
+            color="#64FFDA"
+            anchorX="center"
+            anchorY="middle"
+          >
+            Hi, I'm Shivam!
+          </Text>
+        </group>
+      )}
+    </group>
+  );
 };
 
 // Main 3D scene
-const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
+const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollOffsetChange }) => {
   const scroll = useScroll();
   const cameraRef = useRef();
   const controlsRef = useRef();
-  const { camera, gl, size, scene } = useThree();
+  const { gl } = useThree();
   const [enableControls, setEnableControls] = useState(false);
   const [inScreenView, setInScreenView] = useState(false);
-  const [showComputerScreen, setShowComputerScreen] = useState(false);
-  
-  // Force enableControls to be the opposite of isScrollEnabled
+
+  // Only notify parent when threshold is crossed
+  const lastThreshold = useRef(null);
+  const threshold = 0.7;
+
   useEffect(() => {
     setEnableControls(!isScrollEnabled);
   }, [isScrollEnabled]);
-  
-  // Define model paths - removed invalid references
+
   const modelPaths = {
-    // Comment out any models that don't exist yet
     human: "/models/cool_man.glb",
     chair: "/models/chair.glb",
-    desk: "/models/your-desk-model.glb"  // Updated to point to the correct path in public folder
+    desk: "/models/your-desk-model.glb"
   };
-  
-  // Handle toggling controls separately from React state
-  // to avoid any batching or timing issues
-  const toggleControls = useCallback(() => {
-    console.log("Toggling controls manually");
-    
-    // Toggle app scroll state first
-    if (toggleScrollEnabled) {
-      toggleScrollEnabled();
-    }
-    
-    // Then toggle our own controls
-    setEnableControls(prev => !prev);
-    
-    // Directly manipulate controls if they exist
-    if (controlsRef.current) {
-      controlsRef.current.enabled = !controlsRef.current.enabled;
-      
-      // Force a controls update
-      controlsRef.current.update();
-      console.log("Controls enabled set to:", controlsRef.current.enabled);
-    }
-  }, [toggleScrollEnabled]);
-  
-  // Setup scene elements
+
   useEffect(() => {
-    console.log("Scene mounted");
-    
-    // Initial camera setup
     if (cameraRef.current) {
       cameraRef.current.position.set(0, 2, 5);
       cameraRef.current.lookAt(0, 1, 0);
     }
-    
-    // Setup custom key event handler outside of React's event system
+    // Classic controls toggle logic
+    const toggleControls = () => {
+      setEnableControls(prev => {
+        if (controlsRef.current) {
+          controlsRef.current.enabled = !prev;
+          controlsRef.current.update?.();
+        }
+        return !prev;
+      });
+    };
     const keydownHandler = (e) => {
       if (e.key === 'c' || e.key === 'C') {
-        console.log("C key pressed - direct DOM event");
         toggleControls();
-        e.preventDefault(); // Prevent any default behavior
+        e.preventDefault();
       }
     };
-    
-    // Add the key handler directly to window
     window.addEventListener('keydown', keydownHandler);
-    
-    // Setup mouse handlers to debug events
-    const mouseDownHandler = (e) => {
-      console.log("Mouse down on canvas:", e.clientX, e.clientY);
-    };
-    
-    // Event listeners for debugging
-    gl.domElement.addEventListener('mousedown', mouseDownHandler);
-    
-    // Make sure all DOM elements allow scrolling
-    document.body.style.overflow = 'auto';
     gl.domElement.style.pointerEvents = 'auto';
     gl.domElement.style.touchAction = 'auto';
-    
     return () => {
       window.removeEventListener('keydown', keydownHandler);
-      gl.domElement.removeEventListener('mousedown', mouseDownHandler);
     };
-  }, [gl, toggleControls, enableControls]);
-  
-  // Camera animation and controls management loop
-  useFrame((state, delta) => {
+  }, [gl]);
+
+  useFrame(() => {
     if (!cameraRef.current) return;
-    
-    // Update controls state to match ref
     if (controlsRef.current) {
       if (controlsRef.current.enabled !== enableControls) {
         controlsRef.current.enabled = enableControls;
       }
     }
-    
-    // Check if scroll is near zero (happens on page load)
-    if (scroll.offset === 0 && !enableControls) {
-      // Set initial position
-      cameraRef.current.position.set(0, 2, 5);
-      cameraRef.current.lookAt(0, 1, 0);
-      setInScreenView(false);
+    // Only notify parent when threshold is crossed
+    const offset = scroll.offset;
+    if (
+      lastThreshold.current === null ||
+      (lastThreshold.current <= threshold && offset > threshold) ||
+      (lastThreshold.current > threshold && offset <= threshold)
+    ) {
+      if (onScrollOffsetChange) onScrollOffsetChange(offset);
+      lastThreshold.current = offset;
     }
-    
-    // If controls are enabled, don't move the camera with scroll
-    if (enableControls) return;
-    
-    // Otherwise, handle scroll-based camera animation
-    const scrollOffset = scroll.offset;
-    
-    // Use smooth animation to update camera based on scroll
-    if (scrollOffset < 0.1) {
-      // Initial view of the scene
+
+    // Camera animation
+    if (offset < 0.1) {
       cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
       cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 2, 0.05);
       cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 5, 0.05);
       cameraRef.current.lookAt(0, 1, 0);
       setInScreenView(false);
-    } 
-    else if (scrollOffset < 0.3) {
-      // Transition to monitor view
+    } else if (offset < 0.3) {
       cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
       cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.3, 0.05);
       cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 2, 0.05);
       cameraRef.current.lookAt(0, 1.3, -0.5);
       setInScreenView(false);
-    } 
-    else {
-      // Final position - directly facing the monitor
+    } else {
       cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
       cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.25, 0.05);
       cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 0.3, 0.05);
-      cameraRef.current.lookAt(0, 1.25, -0.5); // Look straight at monitor
-      
-      if (!inScreenView && scrollOffset > 0.4) {
+      cameraRef.current.lookAt(0, 1.25, -0.5);
+      if (!inScreenView && offset > 0.4) {
         setInScreenView(true);
       }
     }
   });
-  
+
   return (
     <>
       <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 2, 5]} />
-      
-      {/* OrbitControls with explicitly managed enablement */}
-      <OrbitControls 
+      <OrbitControls
         ref={controlsRef}
-        enablePan={true} 
-        enableZoom={true} 
+        enablePan={true}
+        enableZoom={true}
         enableRotate={true}
         enabled={enableControls}
         makeDefault
         target={[0, 0, 0]}
       />
-      
-      {/* Helper text to show controls status */}
       <Text
         position={[0, 3.5, 0]}
         fontSize={0.2}
@@ -363,33 +265,28 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
       >
         {enableControls ? "Controls Enabled (Press 'C' to disable)" : "Press 'C' to enable mouse controls"}
       </Text>
-      
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, 10, -10]} intensity={0.5} />
-      
       <Environment preset="city" />
-      
-      {/* Main scene setup - with optional custom models */}
       <group position={[0, 0, 0]}>
-        <Desk 
-          position={[0, 0, -1.5]} 
+        <Desk
+          position={[0, 0, -1.5]}
           modelPath={modelPaths.desk}
           scrollProgress={scroll.offset}
         />
-        <Chair 
-          position={[0, 0, 0.5]} 
+        <Chair
+          position={[0, 0, 0.5]}
           modelPath={modelPaths.chair}
           scrollProgress={scroll.offset}
         />
-        <Human 
-          position={[0, 0, 0]} 
-          toggleTerminal={toggleTerminal} 
+        <Human
+          position={[0, 0, 0]}
+          toggleTerminal={toggleTerminal}
           modelPath={modelPaths.human}
           scrollProgress={scroll.offset}
         />
       </group>
-      
       {/* Technology floating elements (only visible until we zoom in) */}
       {!inScreenView && [-3, -2, -1, 1, 2, 3].map((x, i) => (
         <mesh 
@@ -422,4 +319,4 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled }) => {
   );
 };
 
-export default Scene; 
+export default Scene;

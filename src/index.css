@@ -25,7 +25,7 @@ html, body {
   scroll-snap-type: y proximity; /* Changed from 'mandatory' to 'proximity' for better scroll behavior */
   scrollbar-width: thin;
   scrollbar-color: var(--secondary-color) var(--primary-color);
-  overflow-y: auto !important;
+  overflow-y: hidden !important;
   overflow-x: hidden;
   width: 100%;
 }
@@ -46,12 +46,12 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  overflow: visible;
+  overflow-y: hidden;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 2px;
 }
 
 ::-webkit-scrollbar-track {
@@ -62,7 +62,7 @@ body {
   background-color: var(--secondary-color);
   border-radius: 10px;
   border: 2px solid var(--primary-color);
-}
+} */
 
 .terminal {
   font-family: 'JetBrains Mono', monospace;
@@ -110,7 +110,7 @@ canvas {
   max-width: 900px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   max-height: 80vh;
-  overflow: auto;
+  overflow-y: hidden;
   position: relative;
   z-index: 100;
 }
@@ -457,27 +457,37 @@ section {
 /* Add styles for the Enter Desktop button */
 .enter-desktop-button {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
   z-index: 1000;
-  background-color: #3a1055;
-  color: #64FFDA;
-  border: 2px solid #64FFDA;
+  background-color: #3a105502;
+  color: #ffffff;
+  border: 2px solid #d609ff;
   border-radius: 8px;
   padding: 12px 24px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    opacity 0.4s cubic-bezier(0.4,0,0.2,1),
+    transform 0.4s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
+.enter-desktop-button.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(2);
+  pointer-events: auto;
+}
 .enter-desktop-button:hover {
-  background-color: rgba(100, 255, 218, 0.2);
-  transform: translateY(-3px);
+  background-color: rgba(140, 50, 243, 0.336);
+  /* transform: translateY(-3px); */
   box-shadow: 0 0 20px rgba(100, 255, 218, 0.5);
 }
 

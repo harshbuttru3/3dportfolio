@@ -25,7 +25,14 @@ const applications = {
   browser: {
     title: 'Web Browser',
     icon: Icons.browser,
-    component: () => <div className="app-content browser-content">Web Browser</div>,
+    component: () => 
+    <div className="app-content browser-content">
+      <iframe 
+      src="https://harshbuttru3.github.io/portfolio"
+      frameborder="0"
+      style={{width: '100%', height: '100%',border: 'none'}}
+      />
+    </div>,
     defaultSize: { width: 1000, height: 700 }
   },
   finder: {
@@ -60,6 +67,7 @@ const applications = {
   }
 };
 
+
 const Desktop = () => {
   const [loading, setLoading] = useState(true);
   const [intermediaryLoading, setIntermediaryLoading] = useState(true);
@@ -75,7 +83,7 @@ const Desktop = () => {
     console.log("Desktop mounted - setting up time updater");
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000);
+    }, 30000);
     
     return () => clearInterval(timer);
   }, []);
@@ -215,7 +223,6 @@ const Desktop = () => {
             openApplication={openApplication}
             activeApp={activeApp}
           />
-          
           {/* Desktop footer showing time/date - similar to your screenshot */}
           <div className="desktop-footer">
             <div className="desktop-time">{day}</div>

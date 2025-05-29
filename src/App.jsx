@@ -4,7 +4,6 @@ import { ScrollControls, Scroll } from '@react-three/drei';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Import components
 import Scene from './components/Scene';
 import IntroSection from './components/IntroSection';
 import AboutSection from './components/AboutSection';
@@ -15,7 +14,6 @@ import Terminal from './components/Terminal';
 import ScreenPortal from './components/ScreenPortal';
 import Desktop from './components/Desktop/Desktop';
 
-// Register the ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
 const App = () => {
@@ -23,10 +21,15 @@ const App = () => {
   const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const [inScreenView, setInScreenView] = useState(false);
   const [inDesktopView, setInDesktopView] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showEnterDesktop, setShowEnterDesktop] = useState(false);
   const appRef = useRef(null);
   const canvasRef = useRef(null);
   const htmlRef = useRef(null);
+
+  // Only update when threshold is crossed
+  const handleScrollOffsetChange = (offset) => {
+    setShowEnterDesktop(offset > 0.7); // Show button when scrollOffset > 0.7
+  };
 
   // Update when scroll state changes
   useEffect(() => {
@@ -89,7 +92,7 @@ const App = () => {
       
       sections.forEach((section) => {
         const elements = section.querySelectorAll('.hidden');
-        console.log(`Section ${sections.indexOf(section)} has ${elements.length} hidden elements`);
+        // console.log(`Section ${sections.indexOf(section)} has ${elements.length} hidden elements`);
         
         ScrollTrigger.create({
           trigger: section,
@@ -137,42 +140,29 @@ const App = () => {
     setShowTerminal(!showTerminal);
   };
 
-  // Function to enter desktop view
   const enterDesktopView = () => {
-    console.log("Entering desktop view");
     setInDesktopView(true);
     setInScreenView(false);
   };
 
-  // Function to exit desktop view
   const exitDesktopView = () => {
-    console.log("Exiting desktop view");
     setInDesktopView(false);
     setInScreenView(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Function to communicate screen view state to Scene
   const toggleScreenView = (state) => {
     setInScreenView(state);
   };
 
-  console.log("App render - State:", { 
-    inScreenView, 
-    inDesktopView,
-    scrollProgress: scrollProgress.toFixed(2)
-  });
-
   return (
     <div ref={appRef} className="app">
       <div className="overlay"></div>
-      
-      {/* 3D Canvas - Hidden when in screen or desktop view mode */}
       {!inScreenView && !inDesktopView && (
         <Canvas
           ref={canvasRef}
           camera={{ position: [0, 0, 5], fov: 75 }}
-          style={{ 
+          style={{
             position: 'fixed',
             top: 0,
             left: 0,
@@ -180,31 +170,24 @@ const App = () => {
             height: '100vh',
             zIndex: -1
           }}
-          onCreated={state => {
-            console.log("Canvas created:", state.gl ? "GL Ready" : "No GL");
-            // Store canvas state in window to prevent duplicate creation
-            if (!window._canvasState) {
-              window._canvasState = state;
-            }
-          }}
         >
           <Suspense fallback={null}>
-            <ScrollControls 
-              pages={5} // Number of pages
-              damping={0.4} // Smoother scrolling
-              distance={1} // Page size
-              enabled={isScrollEnabled} // Enable/disable based on state
-              infinite={false} // Disable infinite scrolling
+            <ScrollControls
+              pages={5}
+              damping={0.4}
+              distance={1}
+              enabled={isScrollEnabled}
+              infinite={false}
             >
-              <Scene 
-                toggleTerminal={toggleTerminal} 
+              <Scene
+                toggleTerminal={toggleTerminal}
                 toggleScrollEnabled={toggleScrollEnabled}
                 isScrollEnabled={isScrollEnabled}
                 toggleScreenView={toggleScreenView}
                 inScreenView={inScreenView}
+                onScrollOffsetChange={handleScrollOffsetChange}
               />
               <Scroll ref={htmlRef} html style={{ width: '100%', overflow: 'hidden', opacity: 0 }}>
-                {/* These sections are just for scroll depth, but aren't visible */}
                 <section style={{ height: '100vh' }}></section>
                 <section style={{ height: '100vh' }}></section>
                 <section style={{ height: '100vh' }}></section>
@@ -215,18 +198,14 @@ const App = () => {
           </Suspense>
         </Canvas>
       )}
-      
-      {/* Desktop View Button - Show when not in desktop view */}
       {!inDesktopView && !inScreenView && (
-        <button 
-          className="enter-desktop-button"
+        <button
+          className={`enter-desktop-button${showEnterDesktop ? ' show' : ''}`}
           onClick={enterDesktopView}
         >
           Enter Desktop
         </button>
       )}
-      
-      {/* Screen Portal View - Only shown when in screen view mode */}
       {inScreenView && (
         <ScreenPortal>
           <div className="screen-content-wrapper">
@@ -238,28 +217,20 @@ const App = () => {
           </div>
         </ScreenPortal>
       )}
-      
-      {/* Desktop View - Only shown when in desktop view mode */}
       {inDesktopView && (
         <div className="desktop-wrapper" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1000 }}>
           <Desktop scrollProgress={1} />
         </div>
       )}
-
       {showTerminal && <Terminal onClose={() => setShowTerminal(false)} />}
-      
-      {/* Improved scroll indicator with css animation - only shown in 3D view */}
       {isScrollEnabled && !inScreenView && !inDesktopView && (
         <div className="scroll-indicator">
-          Scroll down to explore, <br/>
+          Scroll down to explore, <br />
           click "C" to interact.
         </div>
-      
       )}
-      
-      {/* Back button when in desktop or screen view */}
       {(inScreenView || inDesktopView) && (
-        <button 
+        <button
           className="back-button"
           onClick={exitDesktopView}
         >
@@ -270,4 +241,4 @@ const App = () => {
   );
 };
 
-export default App; 
+export default App;

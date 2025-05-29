@@ -16,15 +16,8 @@ export const Icons = {
       <circle cx="12" cy="12" r="3" fill="#F5F5F5" />
     </svg>
   ),
-  browser: (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
-      <rect width="20" height="16" x="2" y="4" rx="2" fill="#4285F4" />
-      <rect width="20" height="3" x="2" y="4" rx="1" fill="#5E5E5E" />
-      <circle cx="4.5" cy="5.5" r="0.5" fill="#FF3B30" />
-      <circle cx="6.5" cy="5.5" r="0.5" fill="#FFCC00" />
-      <circle cx="8.5" cy="5.5" r="0.5" fill="#34C759" />
-    </svg>
-  ),
+  browser: imageIcon('/icons/safari.png'),
+  vscode: imageIcon('/icons/vscode.png'),
   finder: imageIcon('/icons/finder.png'),
   discord: (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
