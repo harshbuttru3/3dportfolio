@@ -7,11 +7,11 @@ const DesktopIcons = ({ openApplication }) => {
   const desktopItems = [
     { id: 'photo', name: 'photo_2025-04-10_03-50-19.jpg', iconType: 'image', type: 'image' },
     { id: 'cisco', name: 'cisco', iconType: 'folder', type: 'folder' },
-    { id: 'cseo', name: 'CSEObject Oriented Prog', iconType: 'document', type: 'document' },
-    { id: 'aadhaar', name: 'Aadhaar.pdf', iconType: 'pdf', type: 'pdf' },
+    { id: 'jsnotes', name: 'Javascript notes', iconType: 'document', type: 'document' },
+    { id: 'resume', name: 'Resume.pdf', iconType: 'pdf', type: 'pdf' },
     { id: 'linux', name: '100_Linux_Commands', iconType: 'document', type: 'document' },
     { id: 'akele', name: 'Akele raho by osho.mp3', iconType: 'music', type: 'audio' },
-    { id: 'android', name: 'droidcam.txt', iconType: 'text', type: 'text' },
+    { id: 'droidcam', name: 'droidcam.txt', iconType: 'text', type: 'app' },
     { id: 'chatgpt', name: 'ChatGPT', iconType: 'chatgpt', type: 'app' },
     { id: 'amani', name: 'amani.pdf', iconType: 'pdf', type: 'pdf' },
     { id: 'blender', name: 'blender', iconType: 'folderBlue', type: 'folder' },
@@ -51,20 +51,30 @@ const DesktopIcons = ({ openApplication }) => {
     switch (item.type) {
       case 'app':
         // Open corresponding app
-        if (item.id === 'chatgpt') openApplication('browser');
+        if (item.id === 'chatgpt'){
+           openApplication('chatgpt');
+          break;
+        }
+        if( item.id === 'droidcam') openApplication('droidcam');
         break;
       case 'folder':
         openApplication('finder');
         break;
       case 'document':
+        if (item.id === 'jsnotes') {
+        openApplication('jsnotes');
+        break;
+        }
       case 'pdf':
+        openApplication('resume');
+        break;
       case 'text':
         // Open document viewer
         openApplication('browser');
         break;
       case 'image':
         // Open image viewer
-        openApplication('browser');
+        openApplication('imageViewer');
         break;
       case 'audio':
         // Open audio player

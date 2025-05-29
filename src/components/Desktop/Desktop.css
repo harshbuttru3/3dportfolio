@@ -1,3 +1,9 @@
+@font-face {
+  font-family: Enthocentric;
+  src: url(/fonts/Ethnocentric-Rg.otf) format('opentype');
+  font-weight: 200;
+  font-style: normal;
+}
 /* Desktop Container */
 .desktop-container {
   position: absolute;
@@ -11,14 +17,14 @@
   transition: opacity 0.5s ease;
 }
 
-/* Desktop Background - Cyberpunk theme */
+
 .desktop-background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0b0b2a 0%, #3a1055 100%);
+  /* background: linear-gradient(135deg, #0b0b2a 0%, #3a1055 100%); */
   background-image: url('/images/background.jpg');
   background-size: cover;
   z-index: -1;
@@ -31,7 +37,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(100, 255, 218, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(100, 255, 218, 0.05) 1px, transparent 1px);
   background-size: 30px 30px;
@@ -225,6 +231,8 @@
   height: 16px;
   display: flex;
   margin-right: 8px;
+  align-items: center;
+  justify-content: center;
 }
 
 .window-icon-small svg {
@@ -441,14 +449,14 @@
 /* Desktop Footer (Time/Date display) */
 .desktop-footer {
   position: fixed;
-  top: 50%;
+  top: 80%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   color: white;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Enthocentric','Orbitron', sans-serif;
   letter-spacing: 5px;
   z-index: 5;
   pointer-events: none;

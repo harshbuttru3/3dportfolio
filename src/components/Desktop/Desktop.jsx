@@ -7,20 +7,31 @@ import Loader from './Loader';
 import IntermediaryLoader from './IntermediaryLoader';
 import { Icons } from './BasicIcons';
 import './Desktop.css';
+import GitHubProfile from './GithubProfile';
+
 
 // List of applications that can be opened
 const applications = {
   terminal: {
     title: 'Terminal',
     icon: Icons.terminal,
-    component: Terminal,
-    defaultSize: { width: 700, height: 500 }
+    // component: Terminal,
+    component: () => 
+    <div className="app-content browser-content">
+      <iframe 
+      src="https://harshbuttru3.github.io/harsh"
+      style={{width: '100%', height: '100%',border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 900, height: 500 }
   },
   blender: {
     title: 'Blender',
     icon: Icons.blender,
-    component: () => <div className="app-content blender-content">Blender Application</div>,
-    defaultSize: { width: 800, height: 600 }
+    component: () => <div className="app-content blender-content">
+      <iframe src="https://www.photopea.com" style={{width: '100%', height: '100%', border: 'none'}}></iframe>
+    </div>,
+    defaultSize: { width: 1000, height: 700 }
   },
   browser: {
     title: 'Web Browser',
@@ -29,7 +40,6 @@ const applications = {
     <div className="app-content browser-content">
       <iframe 
       src="https://harshbuttru3.github.io/portfolio"
-      frameborder="0"
       style={{width: '100%', height: '100%',border: 'none'}}
       />
     </div>,
@@ -56,14 +66,75 @@ const applications = {
   github: {
     title: 'GitHub',
     icon: Icons.github,
-    component: () => <div className="app-content github-content">GitHub</div>,
+    component: GitHubProfile,
     defaultSize: { width: 900, height: 650 }
   },
   spotify: {
     title: 'Spotify',
     icon: Icons.spotify,
-    component: () => <div className="app-content spotify-content">Spotify</div>,
+    component: () => <div className="app-content spotify-content">
+     <iframe  src="https://open.spotify.com/embed/playlist/4V2ayLLO2Err0339UoOqfy?utm_source=generator" width="100%" height="100%" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>,
     defaultSize: { width: 900, height: 600 }
+  },
+  resume: {
+    title: 'Resume',
+    icon: Icons.resume,
+    component: () => <div className="app-content resume-content">
+      <iframe 
+        src="/resume.pdf"
+        style={{width: '100%', height: '100%', border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 800, height: 900 }
+  },
+  imageViewer: {
+    title: 'Image Viewer',
+    icon: Icons.image,
+    component: () => <div className="app-content image-viewer-content">
+      <iframe
+        src="https://harshbuttru3.github.io/gallery"
+        style={{width: '100%', height: '100%', border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 800, height: 600 }
+  },
+  droidcam: {
+    title: 'DroidCam',
+    icon: Icons.droidcam,
+    component: () => <div className="app-content droidcam-content">
+      <p style={{ padding: '20px', color: '#64FFDA' }}>
+        lsof /dev/video0
+        sudo kill -9 &lt;PID&gt; <br/>  
+        sudo modprobe -r v4l2loopback<br/>  
+        sudo modprobe v4l2loopback devices=1 video_nr=0 card_label="Droidcam" exclusive_caps=1<br/> 
+        #Now open Droidcam-cli for the virtual device.<br/> 
+        droidcam-cli adb 4747 /dev/video0<br/>  
+     </p>
+    </div>,
+    defaultSize: { width: 800, height: 600 }
+  },
+  chatgpt: {
+    title: 'ChatGPT',
+    icon: Icons.chatgpt,
+    component: () => <div className="app-content chatgpt-content">
+      <iframe 
+        src="https://chat.openai.com"
+        style={{width: '100%', height: '100%', border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 800, height: 600 }
+  },
+  jsnotes: {
+    title: 'JavaScript Notes',
+    icon: Icons.jsnotes,
+    component: () => <div className="app-content jsnotes-content">
+      <iframe 
+        src="https://harshbuttru3.github.io/jsnotes"
+        style={{width: '100%', height: '100%', border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 800, height: 600 }
   }
 };
 
@@ -191,7 +262,6 @@ const Desktop = () => {
       ) : (
         <>
           <div className="desktop-background">
-            {/* Desktop background with purple cyberpunk theme */}
           </div>
 
           <DesktopIcons openApplication={openApplication} />
