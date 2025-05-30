@@ -6,16 +6,16 @@ const DesktopIcons = ({ openApplication }) => {
   // Desktop icons based on your screenshot
   const desktopItems = [
     { id: 'photo', name: 'photo_2025-04-10_03-50-19.jpg', iconType: 'image', type: 'image' },
-    { id: 'cisco', name: 'cisco', iconType: 'folder', type: 'folder' },
+    // { id: 'cisco', name: 'cisco', iconType: 'folder', type: 'folder' },
     { id: 'jsnotes', name: 'Javascript notes', iconType: 'document', type: 'document' },
     { id: 'resume', name: 'Resume.pdf', iconType: 'pdf', type: 'pdf' },
-    { id: 'linux', name: '100_Linux_Commands', iconType: 'document', type: 'document' },
+    { id: 'linux', name: '100_Linux_Commands', iconType: 'pdf', type: 'pdf' },
     { id: 'akele', name: 'Akele raho by osho.mp3', iconType: 'music', type: 'audio' },
     { id: 'droidcam', name: 'droidcam.txt', iconType: 'text', type: 'app' },
-    { id: 'chatgpt', name: 'ChatGPT', iconType: 'chatgpt', type: 'app' },
-    { id: 'amani', name: 'amani.pdf', iconType: 'pdf', type: 'pdf' },
-    { id: 'blender', name: 'blender', iconType: 'folderBlue', type: 'folder' },
-    { id: 'booking', name: 'Booking-App', iconType: 'folderBlue', type: 'folder' }
+    { id: 'chatgpt', name: 'Recursive', iconType: 'chatgpt', type: 'app' },
+    // { id: 'amani', name: 'amani.pdf', iconType: 'pdf', type: 'pdf' },
+    { id: 'projects', name: 'projects', iconType: 'folder', type: 'folder' },
+    { id: 'booking', name: 'Documents', iconType: 'folder', type: 'folder' }
   ];
 
   // Get appropriate icon for item
@@ -66,7 +66,14 @@ const DesktopIcons = ({ openApplication }) => {
         break;
         }
       case 'pdf':
-        openApplication('resume');
+        if(item.id === 'resume'){
+          openApplication('resume');
+          break;
+        }
+        if(item.id === 'linux'){
+          openApplication('linuxcommands');
+          break;
+        }
         break;
       case 'text':
         // Open document viewer

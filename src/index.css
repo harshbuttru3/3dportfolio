@@ -383,10 +383,10 @@ section {
 /* Back button styling */
 .back-button {
   position: fixed;
-  top: 20px;
+  top: 95%;
   left: 20px;
   z-index: 1000;
-  background-color: var(--terminal-bg);
+  background-color: rgba(100, 255, 218, 0.1);
   color: var(--secondary-color);
   border: 1px solid var(--secondary-color);
   border-radius: 4px;
@@ -398,7 +398,7 @@ section {
 }
 
 .back-button:hover {
-  background-color: rgba(100, 255, 218, 0.1);
+  background-color: var(--terminal-bg);
 }
 
 /* Screen content wrapper */

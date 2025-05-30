@@ -352,7 +352,7 @@
   animation: glitch 2s infinite;
 }
 
-/* Intermediary Loader - The first loader that appears when scrolling */
+/* Intermediary Loader*/
 .intermediary-loader {
   position: fixed;
   top: 0;
@@ -362,9 +362,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(10, 10, 20, 0.85);
-  backdrop-filter: blur(8px);
+  background-color: rgba(10, 10, 20, 0.2);
+  /* backdrop-filter: blur(1px); */
   z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.intermediary-loader.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .intermediary-loader-content {
@@ -479,4 +487,4 @@
 /* Add some cyberpunk neon glow effects */
 .window, .dock, .desktop-icon-wrapper:hover .desktop-icon-label {
   box-shadow: 0 0 10px rgba(158, 87, 209, 0.2), 0 0 20px rgba(100, 255, 218, 0.1);
-} 
+}

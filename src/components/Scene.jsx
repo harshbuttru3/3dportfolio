@@ -160,7 +160,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
 
   // Only notify parent when threshold is crossed
   const lastThreshold = useRef(null);
-  const threshold = 0.7;
+  const threshold = 0.9;
 
   useEffect(() => {
     setEnableControls(!isScrollEnabled);

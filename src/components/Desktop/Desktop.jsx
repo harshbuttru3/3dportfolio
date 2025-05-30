@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Dock from './Dock';
 import DesktopIcons from './DesktopIcons';
 import Window from './Window';
-import Terminal from '../Terminal';
 import Loader from './Loader';
-import IntermediaryLoader from './IntermediaryLoader';
+
 import { Icons } from './BasicIcons';
 import './Desktop.css';
+import Finder from './Finder';
 import GitHubProfile from './GithubProfile';
 
 
@@ -48,7 +48,8 @@ const applications = {
   finder: {
     title: 'Finder',
     icon: Icons.finder,
-    component: () => <div className="app-content finder-content">Finder</div>,
+    // Remove the arrow function wrapper to avoid prop passing issues
+    component: Finder,
     defaultSize: { width: 800, height: 500 }
   },
   discord: {
@@ -115,11 +116,11 @@ const applications = {
     defaultSize: { width: 800, height: 600 }
   },
   chatgpt: {
-    title: 'ChatGPT',
+    title: 'Recursive',
     icon: Icons.chatgpt,
     component: () => <div className="app-content chatgpt-content">
       <iframe 
-        src="https://chat.openai.com"
+        src="/forrecursive.html"  //any wrong path will work. like /forrecursive.html it's not there but it will still work
         style={{width: '100%', height: '100%', border: 'none'}}
       />
     </div>,
@@ -131,6 +132,17 @@ const applications = {
     component: () => <div className="app-content jsnotes-content">
       <iframe 
         src="https://harshbuttru3.github.io/jsnotes"
+        style={{width: '100%', height: '100%', border: 'none'}}
+      />
+    </div>,
+    defaultSize: { width: 800, height: 600 }
+  },
+  linuxcommands: {
+    title: 'Linux Commands',
+    icon: Icons.linuxcommands,
+    component: () => <div className="app-content linuxcommands-content">
+      <iframe 
+        src="/linuxcommand.pdf"
         style={{width: '100%', height: '100%', border: 'none'}}
       />
     </div>,
@@ -248,16 +260,8 @@ const Desktop = () => {
   const { day, fullDate } = formatDate();
 
   return (
-    <div 
-      className="desktop-container" 
-      style={{ 
-        opacity: 1,
-        zIndex: 9000
-      }}
-    >
-      {intermediaryLoading ? (
-        <IntermediaryLoader />
-      ) : loading ? (
+    <div className="desktop-container" style={{ opacity: 1, zIndex: 9000 }}>
+      {loading ? (
         <Loader />
       ) : (
         <>
@@ -269,6 +273,7 @@ const Desktop = () => {
           {/* Render open application windows */}
           {openApps.map(appId => {
             const app = applications[appId];
+            const AppComponent = app.component;
             return (
               <Window
                 key={appId}
@@ -282,7 +287,10 @@ const Desktop = () => {
                 defaultPosition={windowPositions[appId]}
                 defaultSize={app.defaultSize}
               >
-                <app.component onClose={() => closeApplication(appId)} />
+                <AppComponent 
+                  openApplication={openApplication}
+                  onClose={() => closeApplication(appId)} 
+                />
               </Window>
             );
           })}
@@ -304,4 +312,4 @@ const Desktop = () => {
   );
 };
 
-export default Desktop; 
+export default Desktop;

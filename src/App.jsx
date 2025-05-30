@@ -13,6 +13,7 @@ import ContactSection from './components/ContactSection';
 import Terminal from './components/Terminal';
 import ScreenPortal from './components/ScreenPortal';
 import Desktop from './components/Desktop/Desktop';
+import IntermediaryLoader from './components/Desktop/IntermediaryLoader';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,14 +22,22 @@ const App = () => {
   const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const [inScreenView, setInScreenView] = useState(false);
   const [inDesktopView, setInDesktopView] = useState(false);
-  const [showEnterDesktop, setShowEnterDesktop] = useState(false);
+  // const [showEnterDesktop, setShowEnterDesktop] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
   const appRef = useRef(null);
   const canvasRef = useRef(null);
   const htmlRef = useRef(null);
 
   // Only update when threshold is crossed
   const handleScrollOffsetChange = (offset) => {
-    setShowEnterDesktop(offset > 0.7); // Show button when scrollOffset > 0.7
+    // setShowEnterDesktop(offset > 0.9); // Show button when scrollOffset > 0.7
+    setShowLoader(offset > 0.9); // Changed from < to > to match the button
+    if (offset > 0.9 ) {
+      setTimeout(() => {
+        enterDesktopView();
+      }, 3500);
+      return;
+    }
   };
 
   // Update when scroll state changes
@@ -159,52 +168,47 @@ const App = () => {
     <div ref={appRef} className="app">
       <div className="overlay"></div>
       {!inScreenView && !inDesktopView && (
-        <Canvas
-          ref={canvasRef}
-          camera={{ position: [0, 0, 5], fov: 75 }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: -1
-          }}
-        >
-          <Suspense fallback={null}>
-            <ScrollControls
-              pages={5}
-              damping={0.4}
-              distance={1}
-              enabled={isScrollEnabled}
-              infinite={false}
-            >
-              <Scene
-                toggleTerminal={toggleTerminal}
-                toggleScrollEnabled={toggleScrollEnabled}
-                isScrollEnabled={isScrollEnabled}
-                toggleScreenView={toggleScreenView}
-                inScreenView={inScreenView}
-                onScrollOffsetChange={handleScrollOffsetChange}
-              />
-              <Scroll ref={htmlRef} html style={{ width: '100%', overflow: 'hidden', opacity: 0 }}>
-                <section style={{ height: '100vh' }}></section>
-                <section style={{ height: '100vh' }}></section>
-                <section style={{ height: '100vh' }}></section>
-                <section style={{ height: '100vh' }}></section>
-                <section style={{ height: '100vh' }}></section>
-              </Scroll>
-            </ScrollControls>
-          </Suspense>
-        </Canvas>
-      )}
-      {!inDesktopView && !inScreenView && (
-        <button
-          className={`enter-desktop-button${showEnterDesktop ? ' show' : ''}`}
-          onClick={enterDesktopView}
-        >
-          Enter Desktop
-        </button>
+        <>
+          <Canvas
+            ref={canvasRef}
+            camera={{ position: [0, 0, 5], fov: 75 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: -1
+            }}
+          >
+            <Suspense fallback={null}>
+              <ScrollControls
+                pages={5}
+                damping={0.4}
+                distance={1}
+                enabled={isScrollEnabled}
+                infinite={false}
+              >
+                <Scene
+                  toggleTerminal={toggleTerminal}
+                  toggleScrollEnabled={toggleScrollEnabled}
+                  isScrollEnabled={isScrollEnabled}
+                  toggleScreenView={toggleScreenView}
+                  inScreenView={inScreenView}
+                  onScrollOffsetChange={handleScrollOffsetChange}
+                />
+                <Scroll ref={htmlRef} html style={{ width: '100%', overflow: 'hidden', opacity: 0 }}>
+                  <section style={{ height: '100vh' }}></section>
+                  <section style={{ height: '100vh' }}></section>
+                  <section style={{ height: '100vh' }}></section>
+                  <section style={{ height: '100vh' }}></section>
+                  <section style={{ height: '100vh' }}></section>
+                </Scroll>
+              </ScrollControls>
+            </Suspense>
+          </Canvas>
+          <IntermediaryLoader className={showLoader ? 'show' : ''} />
+        </>
       )}
       {inScreenView && (
         <ScreenPortal>

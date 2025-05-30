@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './Desktop.css';
 
-const IntermediaryLoader = () => {
+const IntermediaryLoader = ({ className = '' }) => {
   const [dots, setDots] = useState('');
   
   useEffect(() => {
-    console.log("IntermediaryLoader mounted");
-    
-    // Animate loading dots
     const interval = setInterval(() => {
       setDots(prev => {
         const newDots = prev.length >= 3 ? '' : prev + '.';
@@ -15,14 +12,11 @@ const IntermediaryLoader = () => {
       });
     }, 500);
     
-    return () => {
-      console.log("IntermediaryLoader unmounting");
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
   
   return (
-    <div className="intermediary-loader">
+    <div className={`intermediary-loader ${className}`}>
       <div className="intermediary-loader-content">
         <div className="intermediary-pulse"></div>
         <div className="intermediary-text">
@@ -35,4 +29,4 @@ const IntermediaryLoader = () => {
   );
 };
 
-export default IntermediaryLoader; 
+export default IntermediaryLoader;
