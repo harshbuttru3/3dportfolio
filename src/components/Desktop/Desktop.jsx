@@ -26,7 +26,7 @@ const applications = {
     defaultSize: { width: 900, height: 500 }
   },
   blender: {
-    title: 'Blender',
+    title: 'photopea',
     icon: Icons.blender,
     component: () => <div className="app-content blender-content">
       <iframe src="https://www.photopea.com" style={{width: '100%', height: '100%', border: 'none'}}></iframe>
@@ -80,7 +80,7 @@ const applications = {
   },
   resume: {
     title: 'Resume',
-    icon: Icons.resume,
+    icon: Icons.pdf,
     component: () => <div className="app-content resume-content">
       <iframe 
         src="/resume.pdf"
@@ -128,7 +128,7 @@ const applications = {
   },
   jsnotes: {
     title: 'JavaScript Notes',
-    icon: Icons.jsnotes,
+    icon: Icons.document,
     component: () => <div className="app-content jsnotes-content">
       <iframe 
         src="https://harshbuttru3.github.io/jsnotes"
@@ -139,7 +139,7 @@ const applications = {
   },
   linuxcommands: {
     title: 'Linux Commands',
-    icon: Icons.linuxcommands,
+    icon: Icons.pdf,
     component: () => <div className="app-content linuxcommands-content">
       <iframe 
         src="/linuxcommand.pdf"
@@ -158,6 +158,15 @@ const Desktop = () => {
   const [activeApp, setActiveApp] = useState(null); // Currently focused app
   const [windowPositions, setWindowPositions] = useState({}); // Track window positions
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [minimizedApps, setMinimizedApps] = useState([]);
+  
+  // Add defaultDockApps constant to track initial dock apps
+  const defaultDockApps = [
+    'finder', 'browser', 'terminal', 'blender', 
+    'discord', 'telegram', 'github', 'spotify'
+  ];
+
+  const [dockApps, setDockApps] = useState(defaultDockApps);
 
   console.log("Desktop rendering");
 
@@ -207,18 +216,34 @@ const Desktop = () => {
   // Handle opening an application
   const openApplication = (appId) => {
     console.log("Opening application:", appId);
-    if (!openApps.includes(appId)) {
-      setOpenApps([...openApps, appId]);
+    if (minimizedApps.includes(appId)) {
+      handleRestore(appId);
+    } else {
+      if (!openApps.includes(appId)) {
+        setOpenApps(prev => [...prev, appId]);
+        
+        // Add to dock if not already there
+        if (!dockApps.includes(appId)) {
+          setDockApps(prev => [...prev, appId]);
+        }
+      }
+      setActiveApp(appId);
     }
-    setActiveApp(appId);
   };
 
   // Handle closing an application
   const closeApplication = (appId) => {
     console.log("Closing application:", appId);
-    setOpenApps(openApps.filter(id => id !== appId));
+    setOpenApps(prev => prev.filter(id => id !== appId));
+    setMinimizedApps(prev => prev.filter(id => id !== appId));
+    
+    // Only remove from dock if it wasn't in defaultDockApps
+    if (!defaultDockApps.includes(appId)) {
+      setDockApps(prev => prev.filter(id => id !== appId));
+    }
+    
     if (activeApp === appId) {
-      setActiveApp(openApps.length > 1 ? openApps[openApps.length - 2] : null);
+      setActiveApp(null);
     }
   };
 
@@ -233,6 +258,18 @@ const Desktop = () => {
       ...windowPositions,
       [appId]: position
     });
+  };
+
+  // Handle minimizing windows
+  const handleMinimize = (appId) => {
+    setMinimizedApps(prev => [...prev, appId]);
+    setActiveApp(null);
+  };
+
+  // Handle restoring windows
+  const handleRestore = (appId) => {
+    setMinimizedApps(prev => prev.filter(id => id !== appId));
+    setActiveApp(appId);
   };
 
   // Format the date and time
@@ -260,7 +297,11 @@ const Desktop = () => {
   const { day, fullDate } = formatDate();
 
   return (
-    <div className="desktop-container" style={{ opacity: 1, zIndex: 9000 }}>
+    <div 
+      className="desktop-container" 
+      style={{ opacity: 1, zIndex: 9000 }}
+      onContextMenu={(e) => e.preventDefault()} // Disable right-click
+    >
       {loading ? (
         <Loader />
       ) : (
@@ -273,7 +314,6 @@ const Desktop = () => {
           {/* Render open application windows */}
           {openApps.map(appId => {
             const app = applications[appId];
-            const AppComponent = app.component;
             return (
               <Window
                 key={appId}
@@ -281,25 +321,32 @@ const Desktop = () => {
                 title={app.title}
                 iconComponent={app.icon}
                 isActive={activeApp === appId}
+                isMinimized={minimizedApps.includes(appId)}
                 onClose={() => closeApplication(appId)}
                 onFocus={() => focusWindow(appId)}
+                onMinimize={() => handleMinimize(appId)}
                 onPositionUpdate={(position) => updateWindowPosition(appId, position)}
                 defaultPosition={windowPositions[appId]}
                 defaultSize={app.defaultSize}
               >
-                <AppComponent 
+                <app.component 
                   openApplication={openApplication}
-                  onClose={() => closeApplication(appId)} 
+                  onClose={() => closeApplication(appId)}
                 />
               </Window>
             );
           })}
 
           <Dock 
-            applications={applications} 
+            applications={applications}
             openApps={openApps}
+            minimizedApps={minimizedApps}
+            dockApps={dockApps}
             openApplication={openApplication}
             activeApp={activeApp}
+            closeApplication={closeApplication}
+            handleMinimize={handleMinimize}
+            handleMaximize={openApplication}
           />
           {/* Desktop footer showing time/date - similar to your screenshot */}
           <div className="desktop-footer">

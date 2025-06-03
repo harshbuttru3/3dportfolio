@@ -8,7 +8,9 @@ const Window = ({
   children, 
   isActive, 
   onClose, 
-  onFocus, 
+  onFocus,
+  onMinimize, // Add this prop
+  isMinimized, // Add this prop
   onPositionUpdate,
   defaultPosition,
   defaultSize = { width: 800, height: 600 }
@@ -100,6 +102,14 @@ const Window = ({
     setIsMaximized(!isMaximized);
   };
   
+  // Add minimize handler
+  const handleMinimize = (e) => {
+    e.stopPropagation();
+    if (onMinimize) {
+      onMinimize(appId);
+    }
+  };
+
   // Calculate window styles based on state
   const windowStyle = isMaximized
     ? {
@@ -115,24 +125,29 @@ const Window = ({
         left: `${position.x}px`,
         width: `${size.width}px`,
         height: `${size.height}px`,
-        transform: isDragging ? 'scale(1.02)' : 'scale(1)',
-        transition: isDragging ? 'none' : 'transform 0.2s ease'
+        transform: isMinimized 
+          ? 'scale(0.7) translateY(100vh)' 
+          : isDragging 
+            ? 'scale(1.02)' 
+            : 'scale(1)',
+        opacity: isMinimized ? 0 : 1,
+        pointerEvents: isMinimized ? 'none' : 'all',
+        transition: isDragging 
+          ? 'none' 
+          : 'transform 0.3s cubic-bezier(0.2, 0.82, 0.2, 1), opacity 0.3s cubic-bezier(0.2, 0.82, 0.2, 1)'
       };
   
   return (
     <div 
       ref={windowRef}
-      className={`window ${isActive ? 'window-active' : ''}`}
+      className={`window ${isActive ? 'window-active' : ''} ${isMinimized ? 'minimized' : ''}`}
       style={windowStyle}
       onClick={handleWindowClick}
     >
-      <div 
-        className="window-header"
-        onMouseDown={handleDragStart}
-      >
+      <div className="window-header" onMouseDown={handleDragStart}>
         <div className="window-controls">
           <button className="window-control window-close" onClick={onClose}></button>
-          <button className="window-control window-minimize"></button>
+          <button className="window-control window-minimize" onClick={handleMinimize}></button>
           <button className="window-control window-maximize" onClick={toggleMaximize}></button>
         </div>
         
@@ -160,4 +175,4 @@ const Window = ({
   );
 };
 
-export default Window; 
+export default Window;

@@ -229,8 +229,8 @@ const App = () => {
       {showTerminal && <Terminal onClose={() => setShowTerminal(false)} />}
       {isScrollEnabled && !inScreenView && !inDesktopView && (
         <div className="scroll-indicator">
-          Scroll down to explore, <br />
-          click "C" to interact.
+          Scroll down to Enter into my Desktop, <br />
+          Press "C" to interact.
         </div>
       )}
       {(inScreenView || inDesktopView) && (
