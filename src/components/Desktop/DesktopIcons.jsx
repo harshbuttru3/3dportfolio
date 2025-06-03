@@ -10,12 +10,12 @@ const DesktopIcons = ({ openApplication }) => {
     { id: 'jsnotes', name: 'Javascript notes', iconType: 'document', type: 'document' },
     { id: 'resume', name: 'Resume.pdf', iconType: 'pdf', type: 'pdf' },
     { id: 'linux', name: '100_Linux_Commands', iconType: 'pdf', type: 'pdf' },
-    { id: 'akele', name: 'Akele raho by osho.mp3', iconType: 'music', type: 'audio' },
+    // { id: 'akele', name: 'Akele raho by osho.mp3', iconType: 'music', type: 'audio' },
     { id: 'droidcam', name: 'droidcam.txt', iconType: 'text', type: 'app' },
     { id: 'chatgpt', name: 'Recursive', iconType: 'chatgpt', type: 'app' },
     // { id: 'amani', name: 'amani.pdf', iconType: 'pdf', type: 'pdf' },
     { id: 'projects', name: 'projects', iconType: 'folder', type: 'folder' },
-    { id: 'booking', name: 'Documents', iconType: 'folder', type: 'folder' }
+    // { id: 'documents', name: 'Documents', iconType: 'folder', type: 'folder' }
   ];
 
   // Get appropriate icon for item

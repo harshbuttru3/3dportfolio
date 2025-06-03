@@ -9,16 +9,29 @@ const PLACES = [
   { id: "music", name: "Music", icon: Icons.music },
 ];
 
+const DOCUMENT_FILES = [
+  { id: "resume", name: "Resume.pdf", icon: Icons.pdf, iconType: 'pdf', type: 'pdf' },
+  { id: "linuxcommands", name: "Linux Commands.pdf", icon: Icons.pdf, iconType: 'pdf', type: 'pdf' },
+  { id: "jsnotes", name: "JavaScript Notes", icon: Icons.document, iconType: 'document', type: 'document' },
+  { id: "readme", name: "README.md", icon: Icons.document, iconType: 'text', type: 'text' },
+  { id: "license", name: "LICENSE", icon: Icons.document, iconType: 'text', type: 'text' },
+];
+
 const PROJECT_FILES = [
   { id: "github", name: "GitHub", icon: Icons.github, iconType: 'github', type: 'app' },
   { id: "spotify", name: "Spotify", icon: Icons.spotify, iconType: 'spotify', type: 'app' },
-  { id: "jsnotes", name: "JavaScript Notes", icon: Icons.jsnotes, iconType: 'document', type: 'document' },
+  { id: "jsnotes", name: "JavaScript Notes", icon: Icons.document, iconType: 'document', type: 'document' },
   { id: "browser", name: "Portfolio Website", icon: Icons.browser, iconType: 'browser', type: 'app' },
   { id: "booking", name: "Booking-App", icon: Icons.folder, iconType: 'folder', type: 'folder' },
   { id: "cisco", name: "cisco", icon: Icons.folder, iconType: 'folder', type: 'folder' },
   { id: "linux", name: "100_Linux_Commands", icon: Icons.document, iconType: 'document', type: 'document' },
 ];
 
+const Music_FILES = [
+  { id: "everybody", name: "Everybody Dies In Their Nightmares", icon: Icons.music, iconType: 'music', type: 'audio' },
+  { id: "agartum", name: "Agar Tum Saath Ho.mp3", icon: Icons.music, iconType: 'music', type: 'audio' },
+
+];
 const Finder = ({ openApplication }) => {
   const [selectedPlace, setSelectedPlace] = useState("projects");
 
@@ -43,8 +56,13 @@ const Finder = ({ openApplication }) => {
         }
         break;
       case 'pdf':
-        openApplication('resume');
-        break;
+        if(file.id === 'resume') {
+          openApplication('resume');
+          break;
+        }else if(file.id === 'linuxcommands') {
+          openApplication('linuxcommands');
+          break;
+        }
       case 'text':
         openApplication('browser');
         break;
@@ -60,28 +78,65 @@ const Finder = ({ openApplication }) => {
   };
 
   const renderFiles = () => {
-    if (selectedPlace === "projects") {
-      return (
-        <div className="finder-files">
-          {PROJECT_FILES.map(file => (
-            <div
-              key={file.id}
-              className="finder-file"
-              onDoubleClick={() => handleFileClick(file)}
-              title={`Open ${file.name}`}
-            >
-              <span className="finder-file-icon">{file.icon}</span>
-              <span className="finder-file-name">{file.name}</span>
-            </div>
-          ))}
-        </div>
-      );
+    switch(selectedPlace) {
+      case "projects":
+        return (
+          <div className="finder-files">
+            {PROJECT_FILES.map(file => (
+              <div
+                key={file.id}
+                className="finder-file"
+                onDoubleClick={() => handleFileClick(file)}
+                title={`Open ${file.name}`}
+              >
+                <span className="finder-file-icon">{file.icon}</span>
+                <span className="finder-file-name">{file.name}</span>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case "documents":
+        return (
+          <div className="finder-files">
+            {DOCUMENT_FILES.map(file => (
+              <div
+                key={file.id}
+                className="finder-file"
+                onDoubleClick={() => handleFileClick(file)}
+                title={`Open ${file.name}`}
+              >
+                <span className="finder-file-icon">{file.icon}</span>
+                <span className="finder-file-name">{file.name}</span>
+              </div>
+            ))}
+          </div>
+        );
+      
+      case "music":
+        return (
+          <div className="finder-files">
+            {Music_FILES.map(file => (
+              <div
+                key={file.id}
+                className="finder-file"
+                onDoubleClick={() => handleFileClick(file)}
+                title={`Open ${file.name}`}
+              >
+                <span className="finder-file-icon">{file.icon}</span>
+                <span className="finder-file-name">{file.name}</span>
+              </div>
+            ))}
+          </div>
+        );
+      
+      default:
+        return (
+          <div className="finder-empty">
+            No files in this folder.
+          </div>
+        );
     }
-    return (
-      <div className="finder-empty">
-        No files in this folder.
-      </div>
-    );
   };
 
   return (
