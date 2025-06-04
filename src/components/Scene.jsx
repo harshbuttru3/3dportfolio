@@ -1,12 +1,28 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls, useAnimations } from '@react-three/drei';
+import { useGLTF, useScroll, Text, Environment, PerspectiveCamera, OrbitControls, useAnimations, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { preloadModels } from '../utils/modelLoader';
+
+// Preload models
+preloadModels();
+
+// Loader component
+const Loader = () => (
+  <Html center>
+    <div className="loader">
+      <div className="loading-text">Loading 3D Environment...</div>
+    </div>
+  </Html>
+);
 
 // Chair model
-const Chair = ({ position = [0, 0, 0], scale = 1, modelPath, scrollProgress = 0 }) => {
+const Chair = ({ position = [0, 0, 0], scale = 1, modelPath, scrollProgress = 0, turned = false }) => {
   const chairRef = useRef();
   const { scene } = modelPath ? useGLTF(modelPath) : { scene: null };
+  const [currentRotation, setCurrentRotation] = useState(-1.9); // Initial rotation
+  const targetRotation = useRef(-1.9);
+  
   useFrame(() => {
     if (chairRef.current) {
       if (scrollProgress > 0.3) {
@@ -16,10 +32,23 @@ const Chair = ({ position = [0, 0, 0], scale = 1, modelPath, scrollProgress = 0 
         chairRef.current.position.y = -0.8;
         chairRef.current.position.z = -0.1;
         chairRef.current.scale.set(1.7, 1.7, 1.7);
-        chairRef.current.rotation.y = -1.9;
+        
+        // Update target rotation based on turned state
+        targetRotation.current = turned ? (0 + Math.PI, -0.1) : -2.1;
+        
+        // Smoothly interpolate current rotation
+        const newRotation = THREE.MathUtils.lerp(
+          currentRotation,
+          targetRotation.current,
+          0.1
+        );
+        
+        setCurrentRotation(newRotation);
+        chairRef.current.rotation.y = newRotation;
       }
     }
   });
+
   if (!scene) return null;
   return (
     <group ref={chairRef} position={position} scale={scale}>
@@ -62,13 +91,16 @@ const Desk = ({ position = [0, 0, 0], scale = 0.25, modelPath, scrollProgress = 
 };
 
 // Human model
-const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scrollProgress = 0 }) => {
+const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scrollProgress = 0, turned, onTurn }) => {
   const humanRef = useRef();
   const [hovered, setHovered] = useState(false);
-  const [turned, setTurned] = useState(false);
   const { scene, animations } = useGLTF(modelPath);
   const { actions } = useAnimations(animations, humanRef);
   const [isSitting, setIsSitting] = useState(true);
+  const [currentRotation, setCurrentRotation] = useState(-2.3);
+  const [currentPosition, setCurrentPosition] = useState({ x: 0.1, y: -0.8, z: -0.2 });
+  const targetRotation = useRef(-2.3);
+  const targetPosition = useRef({ x: 0.1, y: -0.8, z: -0.2 });
 
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto';
@@ -88,37 +120,43 @@ const Human = ({ position = [0, 0, 0], scale = 1, toggleTerminal, modelPath, scr
   useFrame(() => {
     if (humanRef.current) {
       humanRef.current.scale.set(1.5, 1.5, 1.5);
+      
       if (scrollProgress > 0.3) {
         humanRef.current.position.x = THREE.MathUtils.lerp(humanRef.current.position.x, -20, 0.1);
       } else {
-        humanRef.current.position.x = 0.1;
-        humanRef.current.position.y = -0.8;
-        humanRef.current.position.z = -0.2;
-        humanRef.current.rotation.y = -2.3;
-      }
-      if (turned) {
-        humanRef.current.rotation.y = THREE.MathUtils.lerp(
-          humanRef.current.rotation.y,
-          Math.PI,
-          0.05
+        // Update target position and rotation based on turned state
+        targetRotation.current = turned ?( Math.PI, 0.01) : -2.3;
+        targetPosition.current = turned 
+          ? { x: 0.3, y: -0.75, z: -0.2 }  // Shifted position when turned
+          : { x: 0.1, y: -0.8, z: -0.2 };  // Original position
+        
+        // Smooth position interpolation
+        const newPosition = {
+          x: THREE.MathUtils.lerp(currentPosition.x, targetPosition.current.x, 0.1),
+          y: THREE.MathUtils.lerp(currentPosition.y, targetPosition.current.y, 0.1),
+          z: THREE.MathUtils.lerp(currentPosition.z, targetPosition.current.z, 0.1)
+        };
+        
+        // Smooth rotation interpolation
+        const newRotation = THREE.MathUtils.lerp(
+          currentRotation,
+          targetRotation.current,
+          0.1
         );
-      } else {
-        humanRef.current.rotation.y = THREE.MathUtils.lerp(
-          humanRef.current.rotation.y,
-          0,
-          0.05
-        );
+        
+        // Update states and apply to ref
+        setCurrentPosition(newPosition);
+        setCurrentRotation(newRotation);
+        
+        humanRef.current.position.set(newPosition.x, newPosition.y, newPosition.z);
+        humanRef.current.rotation.y = newRotation;
       }
     }
   });
 
   const handleClick = () => {
-    setTurned(!turned);
-    if (!turned) {
-      setTimeout(() => {
-        // toggleTerminal();
-      }, 500);
-    }
+    onTurn();
+    // You can add additional animation triggers here
   };
 
   if (!scene) return null;
@@ -157,6 +195,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
   const { gl } = useThree();
   const [enableControls, setEnableControls] = useState(false);
   const [inScreenView, setInScreenView] = useState(false);
+  const [turned, setTurned] = useState(false);
 
   // Only notify parent when threshold is crossed
   const lastThreshold = useRef(null);
@@ -167,9 +206,9 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
   }, [isScrollEnabled]);
 
   const modelPaths = {
-    human: "/models/cool_man.glb",
-    chair: "/models/chair.glb",
-    desk: "/models/your-desk-model.glb"
+    human: "/models/optimizedman.glb",
+    chair: "/models/optimizedchair.glb",
+    desk: "/models/optimizeddesk.glb"
   };
 
   useEffect(() => {
@@ -203,12 +242,15 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
 
   useFrame(() => {
     if (!cameraRef.current) return;
+    
+    // Update controls enabled state
     if (controlsRef.current) {
       if (controlsRef.current.enabled !== enableControls) {
         controlsRef.current.enabled = enableControls;
       }
     }
-    // Only notify parent when threshold is crossed
+
+    // Handle scroll threshold notification
     const offset = scroll.offset;
     if (
       lastThreshold.current === null ||
@@ -219,33 +261,44 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
       lastThreshold.current = offset;
     }
 
-    // Camera animation
-    if (offset < 0.1) {
-      cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
-      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 2, 0.05);
-      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 5, 0.05);
-      cameraRef.current.lookAt(0, 1, 0);
-      setInScreenView(false);
-    } else if (offset < 0.3) {
-      cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
-      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.3, 0.05);
-      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 2, 0.05);
-      cameraRef.current.lookAt(0, 1.3, -0.5);
-      setInScreenView(false);
-    } else {
-      cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
-      cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.25, 0.05);
-      cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 0.3, 0.05);
-      cameraRef.current.lookAt(0, 1.25, -0.5);
-      if (!inScreenView && offset > 0.4) {
-        setInScreenView(true);
+    // Only animate camera if controls are disabled
+    if (!enableControls) {
+      if (offset < 0.1) {
+        cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
+        cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 2, 0.05);
+        cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 5, 0.05);
+        cameraRef.current.lookAt(0, 1, 0);
+        setInScreenView(false);
+      } else if (offset < 0.3) {
+        cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
+        cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.3, 0.05);
+        cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 2, 0.05);
+        cameraRef.current.lookAt(0, 1.3, -0.5);
+        setInScreenView(false);
+      } else {
+        cameraRef.current.position.x = THREE.MathUtils.lerp(cameraRef.current.position.x, 0, 0.05);
+        cameraRef.current.position.y = THREE.MathUtils.lerp(cameraRef.current.position.y, 1.25, 0.05);
+        cameraRef.current.position.z = THREE.MathUtils.lerp(cameraRef.current.position.z, 0.3, 0.05);
+        cameraRef.current.lookAt(0, 1.25, -0.5);
+        if (!inScreenView && offset > 0.4) {
+          setInScreenView(true);
+        }
       }
     }
   });
 
+  const handleTurn = () => {
+    setTurned(!turned);
+  };
+
   return (
     <>
-      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 2, 5]} />
+      <PerspectiveCamera 
+        ref={cameraRef} 
+        makeDefault 
+        position={[0, 2, 5]} 
+        fov={75}
+      />
       <OrbitControls
         ref={controlsRef}
         enablePan={true}
@@ -253,7 +306,12 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
         enableRotate={true}
         enabled={enableControls}
         makeDefault
-        target={[0, 0, 0]}
+        target={[0, 1, 0]} // Adjust target to look at the center of the scene
+        minDistance={1} // Add minimum zoom distance
+        maxDistance={20} // Add maximum zoom distance
+        // Add damping for smoother controls
+        enableDamping={true}
+        dampingFactor={0.05}
       />
       <Text
         position={[0, 3.5, 0]}
@@ -269,24 +327,29 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, 10, -10]} intensity={0.5} />
       <Environment preset="city" />
-      <group position={[0, 0, 0]}>
-        <Desk
-          position={[0, 0, -1.5]}
-          modelPath={modelPaths.desk}
-          scrollProgress={scroll.offset}
-        />
-        <Chair
-          position={[0, 0, 0.5]}
-          modelPath={modelPaths.chair}
-          scrollProgress={scroll.offset}
-        />
-        <Human
-          position={[0, 0, 0]}
-          toggleTerminal={toggleTerminal}
-          modelPath={modelPaths.human}
-          scrollProgress={scroll.offset}
-        />
-      </group>
+      <Suspense fallback={<Loader />}>
+        <group position={[0, 0, 0]}>
+          <Desk
+            position={[0, 0, -1.5]}
+            modelPath={modelPaths.desk}
+            scrollProgress={scroll.offset}
+          />
+          <Chair
+            position={[0, 0, 0.5]}
+            modelPath={modelPaths.chair}
+            scrollProgress={scroll.offset}
+            turned={turned}
+          />
+          <Human
+            position={[0, 0, 0]}
+            toggleTerminal={toggleTerminal}
+            modelPath={modelPaths.human}
+            scrollProgress={scroll.offset}
+            turned={turned}
+            onTurn={handleTurn}
+          />
+        </group>
+      </Suspense>
       {/* Technology floating elements (only visible until we zoom in) */}
       {!inScreenView && [-3, -2, -1, 1, 2, 3].map((x, i) => (
         <mesh 
@@ -306,7 +369,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
       ))}
       
       {/* Floor - simple grid */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.75, 0]}>
         <planeGeometry args={[50, 50, 50, 50]} />
         <meshStandardMaterial 
           color="#1E2D3D"

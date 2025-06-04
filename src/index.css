@@ -364,6 +364,23 @@ section {
   border: 1px solid rgba(100, 255, 218, 0.3);
 }
 
+/* Loader styles */
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 30, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.loading-text {
+  color: #64FFDA;
+  font-size: 1.2em;
+  text-align: center;
+}
+
 /* Make sections responsive */
 @media (max-width: 768px) {
   .content-container {
@@ -493,4 +510,4 @@ section {
 
 .enter-desktop-button:active {
   transform: translateY(1px);
-} 
+}
