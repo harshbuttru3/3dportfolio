@@ -24,6 +24,7 @@ const App = () => {
   const [inDesktopView, setInDesktopView] = useState(false);
   // const [showEnterDesktop, setShowEnterDesktop] = useState(false);
   const [showLoader, setShowLoader] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const appRef = useRef(null);
   const canvasRef = useRef(null);
   const htmlRef = useRef(null);
@@ -164,6 +165,19 @@ const App = () => {
     setInScreenView(state);
   };
 
+  // Detect touch devices
+  useEffect(() => {
+    const isTouchCapable = ('ontouchstart' in window) || 
+      (window.DocumentTouch && document instanceof window.DocumentTouch);
+    setIsTouchDevice(isTouchCapable);
+
+    // Enable smooth scrolling for touch devices
+    if (isTouchCapable) {
+      document.body.style.overscrollBehavior = 'contain';
+      document.documentElement.style.touchAction = 'pan-y pinch-zoom';
+    }
+  }, []);
+
   return (
     <div ref={appRef} className="app">
       <div className="overlay"></div>
@@ -188,6 +202,11 @@ const App = () => {
                 distance={1}
                 enabled={isScrollEnabled}
                 infinite={false}
+                touch={{
+                  enabled: true,
+                  momentum: true,
+                  momentumDamping: 0.4
+                }}
               >
                 <Scene
                   toggleTerminal={toggleTerminal}
@@ -229,8 +248,17 @@ const App = () => {
       {showTerminal && <Terminal onClose={() => setShowTerminal(false)} />}
       {isScrollEnabled && !inScreenView && !inDesktopView && (
         <div className="scroll-indicator">
-          Scroll down to Enter into my Desktop, <br />
-          Press "C" to interact.
+          {isTouchDevice ? (
+            <>
+              Scroll down to Enter Desktop<br />
+              Tap the button above to interact
+            </>
+          ) : (
+            <>
+              Scroll down to Enter into my Desktop,<br />
+              Press "C" to interact.
+            </>
+          )}
         </div>
       )}
       {(inScreenView || inDesktopView) && (

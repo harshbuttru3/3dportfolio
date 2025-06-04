@@ -511,3 +511,26 @@ section {
 .enter-desktop-button:active {
   transform: translateY(1px);
 }
+
+/* Add to your existing CSS file */
+@media (hover: none) and (pointer: coarse) {
+  .scroll-indicator {
+    padding: 20px;
+    font-size: 16px;
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+  }
+
+  .controls-button:active {
+    transform: scale(0.95);
+    background: rgba(100, 255, 218, 0.2);
+  }
+
+  /* Improve touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 24px;
+  }
+}

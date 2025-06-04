@@ -196,6 +196,7 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
   const [enableControls, setEnableControls] = useState(false);
   const [inScreenView, setInScreenView] = useState(false);
   const [turned, setTurned] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Only notify parent when threshold is crossed
   const lastThreshold = useRef(null);
@@ -239,6 +240,36 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
       window.removeEventListener('keydown', keydownHandler);
     };
   }, [gl]);
+
+  useEffect(() => {
+    // Detect touch device
+    const isTouchCapable = ('ontouchstart' in window) || 
+      (window.DocumentTouch && document instanceof window.DocumentTouch);
+    setIsTouchDevice(isTouchCapable);
+  }, []);
+
+  // Add touch button component
+  const ControlsButton = () => (
+    <Html position={[0, 4, 0]}>
+      <button 
+        className="controls-button"
+        onClick={() => setEnableControls(prev => !prev)}
+        style={{
+          background: 'rgba(100, 255, 218, 0.1)',
+          border: '1px solid #64FFDA',
+          color: '#64FFDA',
+          padding: '8px 16px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          backdropFilter: 'blur(4px)',
+          transition: 'all 0.3s ease'
+        }}
+      >
+        {enableControls ? 'Disable Controls' : 'Enable Controls'}
+      </button>
+    </Html>
+  );
 
   useFrame(() => {
     if (!cameraRef.current) return;
@@ -312,17 +343,26 @@ const Scene = ({ toggleTerminal, toggleScrollEnabled, isScrollEnabled, onScrollO
         // Add damping for smoother controls
         enableDamping={true}
         dampingFactor={0.05}
+        touches={{
+          one: enableControls ? THREE.TOUCH.ROTATE : THREE.TOUCH.DOLLY_PAN,
+          two: enableControls ? THREE.TOUCH.DOLLY_PAN : THREE.TOUCH.ROTATE
+        }}
       />
-      <Text
-        position={[0, 3.5, 0]}
-        fontSize={0.2}
-        color="#64FFDA"
-        anchorX="center"
-        anchorY="middle"
-        renderOrder={100}
-      >
-        {enableControls ? "Controls Enabled (Press 'C' to disable)" : "Press 'C' to enable mouse controls"}
-      </Text>
+      {/* Show button instead of text for touch devices */}
+      {isTouchDevice ? (
+        <ControlsButton />
+      ) : (
+        <Text
+          position={[0, 3.5, 0]}
+          fontSize={0.2}
+          color="#64FFDA"
+          anchorX="center"
+          anchorY="middle"
+          renderOrder={100}
+        >
+          {enableControls ? "Controls Enabled (Press 'C' to disable)" : "Press 'C' to enable mouse controls"}
+        </Text>
+      )}
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
       <pointLight position={[-10, 10, -10]} intensity={0.5} />
